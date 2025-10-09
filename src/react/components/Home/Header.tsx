@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
-
 import logo from "../../assets/logo.webp";
-
 import { Menu, X } from "lucide-react";
+
+const NAV_MENU = [
+  { href: "#hero", label: "Beranda" },
+  { href: "#timeline", label: "Timeline" },
+  { href: "#daftar-calon", label: "Daftar Calon" },
+  { href: "#faq", label: "FAQ" },
+];
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,85 +23,50 @@ const Header: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-colors duration-300 ${
-        scrolled ? " backdrop-blur bg-blue-900/60" : "bg-transparent"
+      className={`fixed top-0 left-0 z-10 w-full text-white backdrop-blur transition-colors ${
+        scrolled ? "bg-blue-900/75" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto p-4 flex items-center justify-between">
+      <div className="container mx-auto flex items-center justify-between border-b border-blue-900/25 p-4">
         <div className="flex items-center gap-3">
           <img
             src={logo}
             alt="Logo"
-            className="size-10 rounded-full bg-white p-1"
+            className="size-10 rounded-full bg-white p-0.5"
           />
-          <span className="font-bold text-lg text-white">PEMIRA PKN STAN</span>
+          <span className="text-lg font-bold">PEMIRA PKN STAN</span>
         </div>
-        {/* Desktop nav */}
         <nav className="hidden md:block">
-          <ul className="flex gap-6 text-white font-medium">
-            <li>
-              <a href="#hero" className="hover:underline">
-                Beranda
-              </a>
-            </li>
-            <li>
-              <a href="#daftar-calon" className="hover:underline">
-                Daftar Calon
-              </a>
-            </li>
-            <li>
-              <a href="#faq" className="hover:underline">
-                FAQ
-              </a>
-            </li>
+          <ul className="flex gap-6 font-medium">
+            {NAV_MENU.map((item) => (
+              <li key={item.href}>
+                <a href={item.href} className="hover:underline">
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
-        {/* Hamburger button for mobile */}
         <button
-          className="md:hidden text-white focus:outline-none"
-          aria-label="Toggle navigation menu"
+          className="md:hidden"
           onClick={() => setMenuOpen((open) => !open)}
         >
           {menuOpen ? <X /> : <Menu />}
         </button>
       </div>
-      {/* Mobile nav menu with transition */}
-      <nav
-        className={`md:hidden bg-blue-900 border-t border-blue-800 transition-all duration-300 overflow-hidden ${
-          menuOpen
-            ? "max-h-60 opacity-100"
-            : "max-h-0 opacity-0 pointer-events-none"
-        }`}
-        aria-hidden={!menuOpen}
-      >
-        <ul className="flex flex-col gap-2 p-4 text-white font-medium">
-          <li>
-            <a
-              href="#hero"
-              className="hover:underline block py-2"
-              onClick={() => setMenuOpen(false)}
-            >
-              Beranda
-            </a>
-          </li>
-          <li>
-            <a
-              href="#daftar-calon"
-              className="hover:underline block py-2"
-              onClick={() => setMenuOpen(false)}
-            >
-              Daftar Calon
-            </a>
-          </li>
-          <li>
-            <a
-              href="#faq"
-              className="hover:underline block py-2"
-              onClick={() => setMenuOpen(false)}
-            >
-              FAQ
-            </a>
-          </li>
+      <nav className={`md:hidden ${menuOpen ? "" : "hidden opacity-0"}`}>
+        <ul className="grid gap-2 p-4 font-medium">
+          {NAV_MENU.map((item) => (
+            <li key={item.href}>
+              <a
+                href={item.href}
+                className="block py-2 hover:underline"
+                onClick={() => setMenuOpen(false)}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
     </header>

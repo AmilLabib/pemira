@@ -1,10 +1,10 @@
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import "./index.css";
 
 import Home from "./pages/HomePage";
 import Ballot from "./pages/BallotPage";
-import Dashboard from "./pages/DashboardPage";
+import Login from "./pages/LoginPage";
 
 const root = document.getElementById("root")!;
 
@@ -13,7 +13,8 @@ createRoot(root).render(
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/ballot" element={<Ballot />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
-  </BrowserRouter>
+  </BrowserRouter>,
 );

@@ -2,19 +2,18 @@ const Hero: React.FC = () => {
   return (
     <section
       id="hero"
-      className="bg-gradient-to-b from-blue-900 to-blue-800 text-white py-16 pt-28"
+      className="bg-gradient-to-b from-blue-900 to-blue-800 pt-28 pb-14 text-white"
     >
-      <div className="container mx-auto px-4 flex flex-col items-center text-center gap-6">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-2 drop-shadow-lg">
-          Selamat Datang di PEMIRA PKN STAN
+      <div className="container mx-auto flex flex-col items-center gap-6 px-4 text-center">
+        <h1 className="mb-2 text-4xl font-extrabold text-shadow-md md:text-5xl">
+          PEMIRA PKN STAN {import.meta.env.VITE_YEAR}
         </h1>
-        <p className="text-lg md:text-xl max-w-2xl mb-4">
-          Pemilihan Raya Mahasiswa PKN STAN 2025. Pilih calon terbaikmu dan
-          wujudkan demokrasi kampus yang sehat, jujur, dan transparan.
+        <p className="mb-4 max-w-2xl text-lg font-light italic md:text-xl">
+          Bersama Suara, Wujudkan Asa.
         </p>
         <a
           href="#daftar-calon"
-          className="inline-block px-8 py-3 bg-rose-600 hover:bg-rose-700 rounded-full font-semibold text-white shadow-lg transition-colors duration-200"
+          className="rounded-full bg-yellow-400 px-8 py-3 font-semibold text-neutral-800 shadow-lg transition-colors hover:bg-yellow-500"
         >
           Lihat Daftar Calon
         </a>

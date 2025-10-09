@@ -1,40 +1,40 @@
 import { Hono } from "hono";
-import { basicAuth } from "hono/basic-auth";
-import { env } from "hono/adapter";
 
-const app = new Hono();
+const app = new Hono<{ Bindings: { DB: D1Database } }>();
 
-app.use(
-  "/dashboard",
-  basicAuth({
-    verifyUser: (username, password, c) => {
-      const { USERNAME, PASSWORD } = env<{
-        USERNAME: string;
-        PASSWORD: string;
-      }>(c);
-      return username === USERNAME && password === PASSWORD;
-    },
-  })
-);
+app.post("/api/login", async (c) => {
+  const { nim, token } = await c.req.json();
+  const db = c.env.DB;
+  const user = await db
+    .prepare("SELECT nim FROM voter WHERE nim = ? AND token = ?")
+    .bind(nim, token)
+    .first();
+  if (user) {
+    const sessionToken = crypto.randomUUID();
+    await db
+      .prepare("INSERT INTO sessions (token, nim) VALUES (?, ?)")
+      .bind(sessionToken, nim)
+      .run();
+    c.header("Set-Cookie", `session=${sessionToken}; HttpOnly; Secure; Path=/`);
+    return c.json({ success: true });
+  }
+  return c.json({ success: false }, 401);
+});
 
-app.get("/dashboard", (c) => c.text("Protected Dashboard"));
+app.get("/api/ballot", async (c) => {
+  const cookie = c.req.header("Cookie");
+  const sessionToken = cookie?.match(/session=([^;]+)/)?.[1];
+  if (!sessionToken) return c.json({ error: "Unauthorized" }, 401);
 
-app.use(
-  "/ballot",
-  basicAuth({
-    verifyUser: async (username, password) => {
-      // const { DB } = env<{ DB: D1Database }>(c);
-      // const result = await DB.prepare(
-      //   "SELECT password FROM users WHERE username = ?"
-      // )
-      //   .bind(username)
-      //   .first();
-      // return !!result && result.password === password;
-      return username === "voter" && password === "vote2024";
-    },
-  })
-);
-
-app.post("/ballot", (c) => c.text("Ballot access granted"));
+  const db = c.env.DB;
+  const session = await db
+    .prepare("SELECT nim FROM sessions WHERE token = ?")
+    .bind(sessionToken)
+    .first();
+  if (session) {
+    return c.json({ message: "Access granted to ballot!" });
+  }
+  return c.json({ error: "Unauthorized" }, 401);
+});
 
 export default app;
