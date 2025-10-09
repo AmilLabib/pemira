@@ -3,7 +3,7 @@ import logo from "../../assets/logo.webp";
 import { Menu, X } from "lucide-react";
 
 const NAV_MENU = [
-  { href: "#hero", label: "Beranda" },
+  { href: "#top", label: "Beranda" },
   { href: "#timeline", label: "Timeline" },
   { href: "#daftar-calon", label: "Daftar Calon" },
   { href: "#faq", label: "FAQ" },

@@ -16,13 +16,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid w-full max-w-sm gap-8 rounded-md border border-gray-300 bg-white p-6 shadow-md"
+      className="grid w-full max-w-sm gap-8 rounded-md border border-neutral-300 bg-white p-6 shadow-md"
     >
       <div className="grid gap-4">
         <label className="block">
           <span>NIM</span>
           <input
-            className="block w-full border-0 border-b-2 border-gray-200 px-0.5 focus:border-black focus:ring-0"
+            className="block w-full border-0 border-b-2 border-neutral-200 px-0.5 focus:border-black focus:ring-0"
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
@@ -34,7 +34,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         <label className="block">
           <span>Token</span>
           <input
-            className="block w-full border-0 border-b-2 border-gray-200 px-0.5 focus:border-black focus:ring-0"
+            className="block w-full border-0 border-b-2 border-neutral-200 px-0.5 focus:border-black focus:ring-0"
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"

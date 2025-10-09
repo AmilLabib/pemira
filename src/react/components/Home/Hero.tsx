@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 const Hero: React.FC = () => {
   return (
     <section
@@ -9,14 +11,14 @@ const Hero: React.FC = () => {
           PEMIRA PKN STAN {import.meta.env.VITE_YEAR}
         </h1>
         <p className="mb-4 max-w-2xl text-lg font-light italic md:text-xl">
-          Bersama Suara, Wujudkan Asa.
+          Bersama Suara, Wujudkan Asa
         </p>
-        <a
-          href="#daftar-calon"
+        <Link
+          to="/pendaftaran"
           className="rounded-full bg-yellow-400 px-8 py-3 font-semibold text-neutral-800 shadow-lg transition-colors hover:bg-yellow-500"
         >
-          Lihat Daftar Calon
-        </a>
+          Daftar, Yuk!
+        </Link>
       </div>
     </section>
   );
