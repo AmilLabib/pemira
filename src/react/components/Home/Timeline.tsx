@@ -18,7 +18,10 @@ const timelineEvents = [
 ];
 
 const Timeline: React.FC = () => (
-  <section id="timeline" className="flex flex-col gap-12 px-8 py-16">
+  <section
+    id="timeline"
+    className="flex scroll-mt-8 flex-col gap-12 px-8 py-16"
+  >
     <h2 className="text-center text-3xl font-bold">Timeline Pemira</h2>
     <ul className="flex flex-col">
       {timelineEvents.map((event, idx, array) => (
