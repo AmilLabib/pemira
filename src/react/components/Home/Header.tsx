@@ -48,6 +48,7 @@ const Header: React.FC = () => {
         </nav>
         <button
           className="md:hidden"
+          aria-label="Toggle Menu"
           onClick={() => setMenuOpen((open) => !open)}
         >
           {menuOpen ? <X /> : <Menu />}
