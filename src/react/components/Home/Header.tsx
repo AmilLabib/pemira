@@ -5,7 +5,6 @@ import { Menu, X } from "lucide-react";
 const NAV_MENU = [
   { href: "#top", label: "Beranda" },
   { href: "#timeline", label: "Timeline" },
-  { href: "#daftar-calon", label: "Daftar Calon" },
   { href: "#faq", label: "FAQ" },
 ];
 

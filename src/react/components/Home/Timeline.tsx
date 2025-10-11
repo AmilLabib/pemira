@@ -1,18 +1,19 @@
 const timelineEvents = [
   {
-    date: "10/1/2025",
+    date: "11/3/2025",
     title: "Pendaftaran Bakal Calon Presma, Wapresma, dan Anggota BLM",
   },
-  { date: "10/2/2025", title: "Pengundian Nomor Urut Calon" },
-  { date: "10/10/2025", title: "Kampanye Dimulai" },
+  { date: "11/22/2025", title: "Fit and Proper Test" },
+  { date: "11/23/2025", title: "Pengundian Nomor Urut Calon" },
+  { date: "11/24/2025", title: "Masa Kampanye" },
   {
-    date: "12/12/2025",
+    date: "12/5/2025",
     title: "Mengenal Lebih Dekat Calon Presma dan Wapresma",
   },
-  { date: "12/14/2025", title: "Hari Tenang" },
-  { date: "12/15/2025", title: "Hari Pemilihan Raya" },
+  { date: "12/7/2025", title: "Hari Tenang" },
+  { date: "12/8/2025", title: "Hari Pemilihan Raya" },
   {
-    date: "12/16/2025",
+    date: "12/9/2025",
     title: "Pengumuman dan Sidang Penetapan Hasil Pemilihan Raya",
   },
 ];

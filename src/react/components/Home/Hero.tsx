@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-
 const Hero: React.FC = () => {
   return (
     <section
@@ -13,12 +11,6 @@ const Hero: React.FC = () => {
         <p className="mb-4 max-w-2xl text-lg font-light italic md:text-xl">
           Bersama Suara, Wujudkan Asa
         </p>
-        <Link
-          to="/bakalcalon/daftar"
-          className="rounded-full bg-yellow-400 px-8 py-3 font-semibold text-neutral-800 shadow-lg transition-colors hover:bg-yellow-500"
-        >
-          Daftar, Yuk!
-        </Link>
       </div>
     </section>
   );
