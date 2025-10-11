@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import LoginForm from "../components/Login/LoginForm";
+import LoginForm from "../../components/Pemilih/LoginForm";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

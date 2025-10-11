@@ -1,40 +1,16 @@
 import { Hono } from "hono";
+import login from "./routes/login";
+import ballot from "./routes/ballot";
+import r2 from "./routes/r2";
+import candidates from "./routes/candidates";
+import tickets from "./routes/tickets";
 
-const app = new Hono<{ Bindings: { DB: D1Database } }>();
+const app = new Hono<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>();
 
-app.post("/api/login", async (c) => {
-  const { nim, token } = await c.req.json();
-  const db = c.env.DB;
-  const user = await db
-    .prepare("SELECT nim FROM voter WHERE nim = ? AND token = ?")
-    .bind(nim, token)
-    .first();
-  if (user) {
-    const sessionToken = crypto.randomUUID();
-    await db
-      .prepare("INSERT INTO sessions (token, nim) VALUES (?, ?)")
-      .bind(sessionToken, nim)
-      .run();
-    c.header("Set-Cookie", `session=${sessionToken}; HttpOnly; Secure; Path=/`);
-    return c.json({ success: true });
-  }
-  return c.json({ success: false }, 401);
-});
-
-app.get("/api/ballot", async (c) => {
-  const cookie = c.req.header("Cookie");
-  const sessionToken = cookie?.match(/session=([^;]+)/)?.[1];
-  if (!sessionToken) return c.json({ error: "Unauthorized" }, 401);
-
-  const db = c.env.DB;
-  const session = await db
-    .prepare("SELECT nim FROM sessions WHERE token = ?")
-    .bind(sessionToken)
-    .first();
-  if (session) {
-    return c.json({ message: "Access granted to ballot!" });
-  }
-  return c.json({ error: "Unauthorized" }, 401);
-});
+app.route("/api", login);
+app.route("/api", ballot);
+app.route("/api", r2);
+app.route("/api", candidates);
+app.route("/api", tickets);
 
 export default app;

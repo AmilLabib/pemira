@@ -14,7 +14,7 @@ const Hero: React.FC = () => {
           Bersama Suara, Wujudkan Asa
         </p>
         <Link
-          to="/pendaftaran"
+          to="/bakalcalon/daftar"
           className="rounded-full bg-yellow-400 px-8 py-3 font-semibold text-neutral-800 shadow-lg transition-colors hover:bg-yellow-500"
         >
           Daftar, Yuk!
