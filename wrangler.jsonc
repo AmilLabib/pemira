@@ -5,7 +5,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pemira",
-  "main": "src/hono/index.ts",
+  "main": "./src/hono/index.ts",
   "compatibility_date": "2025-10-11",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
