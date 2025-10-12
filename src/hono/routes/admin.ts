@@ -1,13 +1,21 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
 
+type Bindings = {
+  DB: D1Database;
+  BUCKET: R2Bucket;
+  ADMIN_TOKEN: string;
+};
+
 export const admin = new Hono<{
-  Bindings: { DB: D1Database; BUCKET: R2Bucket };
+  Bindings: Bindings;
 }>();
 
 // simple admin auth guard: expects Authorization: Bearer <token>
 async function requireAdmin(
-  c: Context<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>,
+  c: Context<{
+    Bindings: Bindings;
+  }>,
 ) {
   try {
     const auth = c.req.header("Authorization") || "";
@@ -16,10 +24,8 @@ async function requireAdmin(
     }
     const token = auth.slice(7);
     // compare with environment binding ADMIN_TOKEN (from worker vars)
-    const envVars = c.env as unknown as Record<string, string | undefined>;
-    const expected =
-      envVars && envVars.ADMIN_TOKEN ? envVars.ADMIN_TOKEN : null;
-    if (!expected || token !== expected) {
+    const expected = c.env.ADMIN_TOKEN;
+    if (token !== expected) {
       return c.text("Unauthorized", 401);
     }
     return null;
@@ -29,25 +35,22 @@ async function requireAdmin(
   }
 }
 // list all registrations
-admin.get(
-  "/bakal_calon",
-  async (c: Context<{ Bindings: { DB: D1Database } }>) => {
-    const unauth = await requireAdmin(c as any);
-    if (unauth) return unauth;
-    try {
-      const res = await c.env.DB.prepare(
-        "SELECT * FROM bakal_calon ORDER BY nama",
-      ).all();
-      return c.json({ success: true, result: res.results || [] });
-    } catch (err: unknown) {
-      console.error("admin list error", String(err));
-      return c.json({ success: false, error: String(err) }, { status: 500 });
-    }
-  },
-);
+admin.get("/bakal_calon", async (c: Context<{ Bindings: Bindings }>) => {
+  const unauth = await requireAdmin(c as any);
+  if (unauth) return unauth;
+  try {
+    const res = await c.env.DB.prepare(
+      "SELECT * FROM bakal_calon ORDER BY nama",
+    ).all();
+    return c.json({ success: true, result: res.results || [] });
+  } catch (err: unknown) {
+    console.error("admin list error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
 
 // verify token endpoint - frontend can call this to validate a token against server env
-admin.get("/verify", async (c: Context) => {
+admin.get("/verify", async (c: Context<{ Bindings: Bindings }>) => {
   const unauth = await requireAdmin(c as any);
   if (unauth) return unauth;
   return c.json({ success: true });
@@ -56,7 +59,7 @@ admin.get("/verify", async (c: Context) => {
 // toggle verification by nim
 admin.post(
   "/bakal_calon/:nim/verify",
-  async (c: Context<{ Bindings: { DB: D1Database } }>) => {
+  async (c: Context<{ Bindings: Bindings }>) => {
     const unauth = await requireAdmin(c as any);
     if (unauth) return unauth;
     try {
@@ -85,7 +88,7 @@ admin.post(
 // delete a kandidat and associated R2 objects
 admin.delete(
   "/bakal_calon/:nim",
-  async (c: Context<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>) => {
+  async (c: Context<{ Bindings: Bindings }>) => {
     const unauth = await requireAdmin(c as any);
     if (unauth) return unauth;
     try {
@@ -131,7 +134,7 @@ admin.delete(
 );
 
 // serve a file from R2 (proxy)
-admin.get("/file", async (c: Context<{ Bindings: { BUCKET: R2Bucket } }>) => {
+admin.get("/file", async (c: Context<{ Bindings: Bindings }>) => {
   const unauth = await requireAdmin(c as any);
   if (unauth) return unauth;
   try {
