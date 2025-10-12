@@ -48,7 +48,9 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => (
               ></div>
             )}
           </div>
-          <div className="-mt-2 mb-8 flex flex-1 flex-col">
+          <div
+            className={`-mt-2 ${idx < events.length - 1 ? "mb-8" : ""} flex flex-1 flex-col`}
+          >
             <span className="text-lg font-semibold">
               {new Date(event.date).toLocaleDateString("id-ID", {
                 year: "numeric",
