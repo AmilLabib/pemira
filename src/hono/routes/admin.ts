@@ -82,6 +82,54 @@ admin.post(
   },
 );
 
+// delete a kandidat and associated R2 objects
+admin.delete(
+  "/bakal_calon/:nim",
+  async (c: Context<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>) => {
+    const unauth = await requireAdmin(c as any);
+    if (unauth) return unauth;
+    try {
+      const nim = c.req.param("nim");
+      // fetch full row
+      const row = await c.env.DB.prepare(
+        "SELECT * FROM bakal_calon WHERE nim = ?",
+      )
+        .bind(nim)
+        .first();
+      if (!row) return c.json({ success: false, error: "Not found" }, 404);
+
+      // keys stored in the row that may point to R2 objects
+      const keys = [
+        row.ktm,
+        row.surat_pernyataan,
+        row.cv,
+        row.formulir_pernyataan_dukungan,
+        row.formulir_pendaftaran_tim_sukses,
+        row.foto,
+      ].filter(Boolean) as string[];
+
+      // attempt to delete each object from R2; non-fatal if delete fails
+      for (const k of keys) {
+        try {
+          await c.env.BUCKET.delete(k);
+        } catch (err: unknown) {
+          console.error("failed to delete r2 object", k, String(err));
+        }
+      }
+
+      // delete the row from D1
+      await c.env.DB.prepare("DELETE FROM bakal_calon WHERE nim = ?")
+        .bind(nim)
+        .run();
+
+      return c.json({ success: true, nim });
+    } catch (err: unknown) {
+      console.error("delete error", String(err));
+      return c.json({ success: false, error: String(err) }, { status: 500 });
+    }
+  },
+);
+
 // serve a file from R2 (proxy)
 admin.get("/file", async (c: Context<{ Bindings: { BUCKET: R2Bucket } }>) => {
   const unauth = await requireAdmin(c as any);

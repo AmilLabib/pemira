@@ -119,6 +119,43 @@ const VerifyPage: React.FC = () => {
                   >
                     {c.is_verified ? "Verified" : "Verify"}
                   </button>
+                  <button
+                    className="rounded bg-red-600 px-3 py-1 text-white"
+                    onClick={async () => {
+                      if (
+                        !confirm(
+                          `Delete candidate ${c.nama} (${c.nim})? This will remove stored files.`,
+                        )
+                      )
+                        return;
+                      try {
+                        const token = localStorage.getItem("admin_token");
+                        const res = await fetch(
+                          `/api/admin/bakal_calon/${encodeURIComponent(c.nim)}`,
+                          {
+                            method: "DELETE",
+                            headers: token
+                              ? { Authorization: `Bearer ${token}` }
+                              : undefined,
+                          },
+                        );
+                        const json = await res.json();
+                        if (json.success) {
+                          setCandidates((prev) =>
+                            prev.filter((x) => x.nim !== c.nim),
+                          );
+                        } else {
+                          console.error("delete failed", json);
+                          alert("Delete failed: " + (json.error || "unknown"));
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert("Delete failed: " + String(err));
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
 
