@@ -1,4 +1,3 @@
-import { Nav, Footer, Header } from "../../components/Layout";
 import FAQ from "../../components/Home/FAQ";
 import Timeline from "../../components/Home/Timeline";
 import Carousel, { type Slide } from "../../components/Home/Carousel";
@@ -16,8 +15,6 @@ const carouselSlides: Slide[] = [
 const HomePage: React.FC = () => {
   return (
     <>
-      <Nav />
-      <Header />
       <section className="container mx-auto my-16 px-4">
         <Carousel
           slides={carouselSlides}
@@ -28,7 +25,6 @@ const HomePage: React.FC = () => {
       </section>
       <Timeline />
       <FAQ />
-      <Footer />
     </>
   );
 };

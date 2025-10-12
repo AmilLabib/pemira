@@ -1,8 +1,14 @@
-import React, { useEffect } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router";
+import { useEffect } from "react";
+import { Routes, Route, useLocation, Navigate } from "react-router";
+
+import Layout from "./components/Layout/Layout";
+import AdminLayout from "./components/Layout/AdminLayout";
+import ProtectedAdmin from "./components/Auth/ProtectedAdmin";
+import AdminLogin from "./pages/Admin/AdminLogin";
 
 import Home from "./pages/Home/HomePage";
-import DaftarCalon from "./pages/DaftarCalon/DaftarCalonPage";
+import RegistrationPage from "./pages/Registration/RegistrationPage";
+import VerifyPage from "./pages/Admin/VerifyPage";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -13,9 +19,17 @@ const App: React.FC = () => {
 
   return (
     <Routes>
-      <Route index element={<Home />} />
-      <Route path="daftar-calon" element={<DaftarCalon />} />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="pendaftaran" element={<RegistrationPage />} />
+      </Route>
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin" element={<ProtectedAdmin />}>
+        <Route element={<AdminLayout />}>
+          <Route index element={<Navigate to="verifikasi" replace />} />
+          <Route path="verifikasi" element={<VerifyPage />} />
+        </Route>
+      </Route>
     </Routes>
   );
 };
