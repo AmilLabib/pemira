@@ -2,7 +2,13 @@ import { Hono } from "hono";
 import registrations from "./routes/registrations";
 import admin from "./routes/admin";
 
-const app = new Hono<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>();
+type Bindings = {
+  DB: D1Database;
+  BUCKET: R2Bucket;
+  ADMIN_TOKEN: string;
+};
+
+const app = new Hono<{ Bindings: Bindings }>();
 
 // Healthcheck
 app.get("/", (c) => c.text("OK"));
