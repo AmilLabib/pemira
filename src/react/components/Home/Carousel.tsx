@@ -93,7 +93,6 @@ const Carousel: React.FC<CarouselProps> = ({
                     title={s.title ?? `YouTube video ${s.videoId}`}
                     className="h-full w-full"
                     src={`https://www.youtube.com/embed/${s.videoId}?autoplay=0&rel=0&showinfo=0`}
-                    frameBorder={0}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
