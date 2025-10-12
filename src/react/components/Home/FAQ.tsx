@@ -7,6 +7,16 @@ const faqs = [
     answer:
       "Pemilihan Raya (Pemira) adalah pesta demokrasi tahunan terbesar di PKN STAN yang dijadikan sebagai sarana kedaulatan mahasiswa untuk memilih anggota Badan Legislatif Mahasiswa serta memilih Presiden dan Wakil Presiden Mahasiswa yang dilaksanakan secara langsung, umum, bebas, rahasia, jujur, dan adil.",
   },
+  {
+    question: "Siapakah peserta Pemira?",
+    answer:
+      "Peserta Pemira terdiri dari calon anggota BLM serta pasangan calon Presiden dan Wakil Presiden Mahasiswa yang diusulkan secara perseorangan dan/atau kolektif dan telah memenuhi persyaratan.",
+  },
+  {
+    question: "Siapa sajakah pemilih dalam Pemira ini?",
+    answer:
+      "Seluruh mahasiswa aktif PKN STAN berhak untuk memilih dalam Pemira ini.",
+  },
 ];
 
 const FAQ: React.FC = () => {
@@ -17,7 +27,7 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="mx-auto max-w-2xl px-4 py-16">
+    <section id="faq" className="mx-auto my-16 max-w-2xl px-4">
       <h2 className="mb-8 text-center text-3xl font-bold">FAQ</h2>
       <div className="space-y-4">
         {faqs.map((faq, idx) => (

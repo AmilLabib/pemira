@@ -1,31 +1,17 @@
-const timelineEvents = [
-  {
-    date: "11/3/2025",
-    title: "Pendaftaran Bakal Calon Presma, Wapresma, dan Anggota BLM",
-  },
-  { date: "11/22/2025", title: "Fit and Proper Test" },
-  { date: "11/23/2025", title: "Pengundian Nomor Urut Calon" },
-  { date: "11/24/2025", title: "Masa Kampanye" },
-  {
-    date: "12/5/2025",
-    title: "Mengenal Lebih Dekat Calon Presma dan Wapresma",
-  },
-  { date: "12/7/2025", title: "Hari Tenang" },
-  { date: "12/8/2025", title: "Hari Pemilihan Raya" },
-  {
-    date: "12/9/2025",
-    title: "Pengumuman dan Sidang Penetapan Hasil Pemilihan Raya",
-  },
-];
+export type TimelineEvent = { date: string; title: string };
 
-const Timeline: React.FC = () => (
+interface TimelineProps {
+  events: TimelineEvent[];
+}
+
+const Timeline: React.FC<TimelineProps> = ({ events }) => (
   <section
     id="timeline"
-    className="flex scroll-mt-8 flex-col gap-12 px-8 py-16"
+    className="my-16 flex scroll-mt-16 flex-col gap-12 px-8"
   >
-    <h2 className="text-center text-3xl font-bold">Timeline Pemira</h2>
+    <h2 className="text-center text-3xl font-bold">Lini Masa Pemira</h2>
     <ul className="flex flex-col">
-      {timelineEvents.map((event, idx, array) => (
+      {events.map((event, idx, array) => (
         <li
           key={event.date}
           className={`relative flex flex-1 gap-4 ${idx % 2 === 1 ? "sm:flex-row-reverse sm:text-right" : ""}`}
@@ -52,7 +38,7 @@ const Timeline: React.FC = () => (
                 }`}
               ></span>
             </div>
-            {idx < timelineEvents.length - 1 && (
+            {idx < events.length - 1 && (
               <div
                 className={`mx-auto h-full w-0.5 ${
                   new Date(array[idx + 1].date) < new Date()
