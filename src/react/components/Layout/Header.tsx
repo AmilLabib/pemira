@@ -1,6 +1,6 @@
 const Header: React.FC = () => {
   return (
-    <section
+    <header
       id="hero"
       className="bg-gradient-to-b from-blue-900 to-blue-800 pt-28 pb-14 text-white"
     >
@@ -12,7 +12,7 @@ const Header: React.FC = () => {
           Bersama Suara, Wujudkan Asa
         </p>
       </div>
-    </section>
+    </header>
   );
 };
 

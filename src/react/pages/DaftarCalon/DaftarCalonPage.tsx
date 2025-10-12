@@ -1,7 +1,5 @@
 import React from "react";
-import Header from "../../components/Home/Nav";
-import Footer from "../../components/Home/Footer";
-import Hero from "../../components/Home/Header";
+import { Nav, Footer, Header } from "../../components/Layout";
 
 const candidates = [
   { name: "Calon A", number: 1, program: "Program Studi X" },
@@ -11,8 +9,8 @@ const candidates = [
 const DaftarCalonPage: React.FC = () => {
   return (
     <>
+      <Nav />
       <Header />
-      <Hero />
       <main className="container mx-auto px-4 py-16">
         <h1 className="mb-6 text-3xl font-bold">Daftar Calon</h1>
         <div className="grid gap-4">

@@ -1,6 +1,4 @@
-import Nav from "../../components/Home/Nav";
-import Footer from "../../components/Home/Footer";
-import Header from "../../components/Home/Header";
+import { Nav, Footer, Header } from "../../components/Layout";
 import FAQ from "../../components/Home/FAQ";
 import Timeline from "../../components/Home/Timeline";
 import Carousel, { type Slide } from "../../components/Home/Carousel";

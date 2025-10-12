@@ -21,7 +21,7 @@ const Nav: React.FC = () => {
   }, []);
 
   return (
-    <header
+    <div
       className={`fixed top-0 left-0 z-50 w-full text-white backdrop-blur transition-colors ${
         scrolled ? "bg-blue-900/75" : "bg-transparent"
       }`}
@@ -69,7 +69,7 @@ const Nav: React.FC = () => {
           ))}
         </ul>
       </nav>
-    </header>
+    </div>
   );
 };
 
