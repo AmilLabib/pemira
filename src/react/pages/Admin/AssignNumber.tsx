@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
+// no direct auth hook needed; requests use cookie credentials
 
 type Candidate = {
   posisi: string;
@@ -22,14 +22,13 @@ const AssignNumber: React.FC = () => {
   const [assigning, setAssigning] = useState<string | null>(null);
   const [numberInput, setNumberInput] = useState<string>("");
 
-  const auth = useAuth();
+  // using cookie session; no direct auth token needed here
 
   const fetchCandidates = React.useCallback(async () => {
     setLoading(true);
     try {
-      const token = auth.token;
       const res = await fetch("/api/admin/bakal_calon", {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        credentials: "same-origin",
       });
       const json = await res.json();
       if (json.success)
@@ -42,11 +41,11 @@ const AssignNumber: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [auth.token]);
+  }, []);
 
   useEffect(() => {
     fetchCandidates();
-  }, [fetchCandidates]);
+  }, []);
 
   async function assignNumber(nim: string) {
     const parsed = Number(numberInput);
@@ -56,14 +55,13 @@ const AssignNumber: React.FC = () => {
     }
     setAssigning(nim);
     try {
-      const token = auth.token;
       const res = await fetch(
         `/api/admin/bakal_calon/${encodeURIComponent(nim)}/assign_number`,
         {
           method: "POST",
+          credentials: "same-origin",
           headers: {
             "content-type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({ number: parsed }),
         },
@@ -88,15 +86,12 @@ const AssignNumber: React.FC = () => {
     if (!confirm("Clear assigned number for this candidate?")) return;
     setAssigning(nim);
     try {
-      const token = auth.token;
       const res = await fetch(
         `/api/admin/bakal_calon/${encodeURIComponent(nim)}/assign_number`,
         {
           method: "POST",
-          headers: {
-            "content-type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
+          credentials: "same-origin",
+          headers: { "content-type": "application/json" },
           body: JSON.stringify({ number: null }),
         },
       );

@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 
 const AdminLogin: React.FC = () => {
-  const [token, setToken] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation() as unknown as {
@@ -14,24 +15,21 @@ const AdminLogin: React.FC = () => {
     (location.state && location.state.from && location.state.from.pathname) ||
     "/admin";
 
-  const { verifyWithBackend, setToken: setAuthToken } = useAuth();
+  const { login } = useAuth();
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    (async () => {
-      try {
-        const ok = await verifyWithBackend(token);
-        if (!ok) {
-          setError("Invalid token");
-          return;
-        }
-        setAuthToken(token);
-        navigate(from, { replace: true });
-      } catch (err) {
-        console.error("verify error", err);
-        setError("Network error");
+    try {
+      const ok = await login(username, password);
+      if (!ok) {
+        setError("Invalid credentials");
+        return;
       }
-    })();
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error("login error", err);
+      setError("Network error");
+    }
   }
 
   return (
@@ -43,11 +41,21 @@ const AdminLogin: React.FC = () => {
         <h2 className="mb-4 text-lg font-semibold">Admin Login</h2>
         {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
         <label className="mb-2 block text-sm">
-          Token
+          Username
           <input
             className="mt-1 block w-full rounded border px-2 py-1"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoFocus
+          />
+        </label>
+        <label className="mb-2 block text-sm">
+          Password
+          <input
+            className="mt-1 block w-full rounded border px-2 py-1"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </label>
         <div className="flex justify-end">

@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
-import { requireAdmin } from "../auth";
+import { requireAdmin, createSessionCookie } from "../auth";
 
 type Bindings = {
   DB: D1Database;
   BUCKET: R2Bucket;
-  ADMIN_TOKEN: string;
+  ADMIN_USERNAME?: string;
+  ADMIN_PASSWORD?: string;
 };
 
 export const admin = new Hono<{
@@ -31,6 +32,41 @@ admin.get("/verify", async (c: Context<{ Bindings: Bindings }>) => {
   const unauth = await requireAdmin(c as any);
   if (unauth) return unauth;
   return c.json({ success: true });
+});
+
+// login endpoint: accept JSON { username, password }
+admin.post("/login", async (c: Context<{ Bindings: Bindings }>) => {
+  try {
+    const body = await c.req.json().catch(() => ({}) as any);
+    const username = typeof body.username === "string" ? body.username : "";
+    const password = typeof body.password === "string" ? body.password : "";
+
+    // prefer explicit ADMIN_USERNAME/PASSWORD env bindings; fallback: single shared secret
+    const env = c.env as unknown as Bindings;
+    const expectedUser = env.ADMIN_USERNAME || "admin";
+    const expectedPass = env.ADMIN_PASSWORD || "";
+
+    if (username !== expectedUser || password !== expectedPass) {
+      return c.json({ success: false, error: "invalid credentials" }, 401);
+    }
+
+    const cookie = await createSessionCookie(env, username);
+    return c.json({ success: true }, { headers: { "Set-Cookie": cookie } });
+  } catch (err: unknown) {
+    console.error("login error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
+
+// logout: clear cookie
+admin.post("/logout", async (c: Context<{ Bindings: Bindings }>) => {
+  try {
+    const cookie = `admin_session=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0`;
+    return c.json({ success: true }, { headers: { "Set-Cookie": cookie } });
+  } catch (err: unknown) {
+    console.error("logout error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
 });
 
 // toggle verification by nim
