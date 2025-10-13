@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
+import { requireAdmin } from "../auth";
 
 type Bindings = {
   DB: D1Database;
@@ -10,30 +11,6 @@ type Bindings = {
 export const admin = new Hono<{
   Bindings: Bindings;
 }>();
-
-// simple admin auth guard: expects Authorization: Bearer <token>
-async function requireAdmin(
-  c: Context<{
-    Bindings: Bindings;
-  }>,
-) {
-  try {
-    const auth = c.req.header("Authorization") || "";
-    if (!auth.startsWith("Bearer ")) {
-      return c.text("Unauthorized", 401);
-    }
-    const token = auth.slice(7);
-    // compare with environment binding ADMIN_TOKEN (from worker vars)
-    const expected = c.env.ADMIN_TOKEN;
-    if (token !== expected) {
-      return c.text("Unauthorized", 401);
-    }
-    return null;
-  } catch (err: unknown) {
-    console.error("auth check error", String(err));
-    return c.text("Unauthorized", 401);
-  }
-}
 // list all registrations
 admin.get("/bakal_calon", async (c: Context<{ Bindings: Bindings }>) => {
   const unauth = await requireAdmin(c as any);
@@ -80,6 +57,63 @@ admin.post(
       return c.json({ success: true, nim, is_verified: newVal });
     } catch (err: unknown) {
       console.error("verify error", String(err));
+      return c.json({ success: false, error: String(err) }, { status: 500 });
+    }
+  },
+);
+
+// assign a ticket number to a candidate (or clear it)
+admin.post(
+  "/bakal_calon/:nim/assign_number",
+  async (c: Context<{ Bindings: Bindings }>) => {
+    const unauth = await requireAdmin(c as any);
+    if (unauth) return unauth;
+    try {
+      const nim = c.req.param("nim");
+      const body = await c.req.json().catch(() => ({}));
+      const num = typeof body.number === "number" ? body.number : null;
+
+      // fetch row to ensure exists and get posisi
+      const row = await c.env.DB.prepare(
+        "SELECT posisi FROM bakal_calon WHERE nim = ?",
+      )
+        .bind(nim)
+        .first();
+      if (!row) return c.json({ success: false, error: "Not found" }, 404);
+
+      // if candidate is presma or wapresma and num is set, also assign the same number
+      // to the counterpart (pair) so presma/wapresma share one ticket.
+      const r = row as any;
+      const posisi: string = r.posisi;
+
+      // update this candidate
+      await c.env.DB.prepare(
+        "UPDATE bakal_calon SET ticket_number = ? WHERE nim = ?",
+      )
+        .bind(num, nim)
+        .run();
+
+      if ((posisi === "presma" || posisi === "wapresma") && num !== null) {
+        // find the other candidate in the pair (same formulir_pendaftaran_tim_sukses) if possible
+        // fallback: assign the same number to any candidate with posisi opposite and same nama pattern
+        // Simpler approach: assign to the other row with same formulir_pendaftaran_tim_sukses key
+        const pairRow = await c.env.DB.prepare(
+          "SELECT nim FROM bakal_calon WHERE posisi != ? AND formulir_pendaftaran_tim_sukses = (SELECT formulir_pendaftaran_tim_sukses FROM bakal_calon WHERE nim = ?) LIMIT 1",
+        )
+          .bind(posisi, nim)
+          .first();
+        if (pairRow && pairRow.nim) {
+          await c.env.DB.prepare(
+            "UPDATE bakal_calon SET ticket_number = ? WHERE nim = ?",
+          )
+            .bind(num, pairRow.nim)
+            .run();
+        }
+      }
+
+      return c.json({ success: true, nim, number: num });
+    } catch (err: unknown) {
+      console.error("assign number error", String(err));
       return c.json({ success: false, error: String(err) }, { status: 500 });
     }
   },

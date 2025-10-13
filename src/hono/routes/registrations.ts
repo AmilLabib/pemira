@@ -57,6 +57,25 @@ registrations.post(
       const timKey = await uploadFile("formulir_pendaftaran_tim_sukses");
       const fotoKey = await uploadFile("foto");
 
+      // Prevent duplicate NIM: check if a row with same nim already exists
+      try {
+        const existing = await c.env.DB.prepare(
+          "SELECT nim FROM bakal_calon WHERE nim = ? LIMIT 1",
+        )
+          .bind(nim)
+          .first();
+        if (existing && existing.nim) {
+          return new Response(
+            JSON.stringify({ success: false, error: "NIM already registered" }),
+            { status: 409, headers: { "content-type": "application/json" } },
+          );
+        }
+      } catch (err: unknown) {
+        console.error("dup check error", String(err));
+        // continue to the main error handler by throwing
+        throw err;
+      }
+
       // Insert into D1 (is_verified defaults to 0)
       const sql = `INSERT INTO bakal_calon (
       posisi, nama, nim, kelas, jurusan, dapil, visi, misi, program_kerja,
@@ -64,7 +83,7 @@ registrations.post(
       formulir_pendaftaran_tim_sukses, link_video, foto, is_verified
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-      const stmt = await c.env.DB.prepare(sql);
+      const stmt = c.env.DB.prepare(sql);
       const res = await stmt
         .bind(
           posisi,
@@ -112,3 +131,56 @@ registrations.post(
 );
 
 export default registrations;
+
+// Public listing of verified candidates with assigned ticket numbers
+// Mounted under /api/daftar/bakal_calon
+registrations.get(
+  "/bakal_calon",
+  async (c: Context<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>) => {
+    try {
+      const res = await c.env.DB.prepare(
+        "SELECT * FROM bakal_calon WHERE is_verified = 1 AND ticket_number IS NOT NULL ORDER BY ticket_number, nama",
+      ).all();
+      return c.json({ success: true, result: res.results || [] });
+    } catch (err: unknown) {
+      console.error("/api/daftar/bakal_calon error:", String(err));
+      return new Response(
+        JSON.stringify({ success: false, error: String(err) }),
+        { status: 500, headers: { "content-type": "application/json" } },
+      );
+    }
+  },
+);
+
+// Public file proxy for R2 objects for daftar routes
+// Example: GET /api/daftar/file?key=registrations/1234_image.png
+registrations.get(
+  "/file",
+  async (c: Context<{ Bindings: { DB: D1Database; BUCKET: R2Bucket } }>) => {
+    try {
+      const key = c.req.query("key") as string | null;
+      if (!key) return c.text("missing key", 400);
+      const obj = await c.env.BUCKET.get(key);
+      if (!obj) return c.text("not found", 404);
+
+      // stream the object back with original content-type and caching
+      const headers: Record<string, string> = {};
+      if (obj.httpMetadata && obj.httpMetadata.contentType)
+        headers["content-type"] = obj.httpMetadata.contentType;
+      // allow browsers to cache images for a short period; adjust as needed
+      headers["cache-control"] = "public, max-age=3600";
+
+      const body = await obj.arrayBuffer();
+      return c.body(body, 200, headers);
+    } catch (err: unknown) {
+      console.error("/api/daftar/file error", String(err));
+      return new Response(
+        JSON.stringify({ success: false, error: String(err) }),
+        {
+          status: 500,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    }
+  },
+);

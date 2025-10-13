@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useAuth } from "../../hooks/useAuth";
 
 const AdminLogin: React.FC = () => {
   const [token, setToken] = useState("");
@@ -13,25 +14,19 @@ const AdminLogin: React.FC = () => {
     (location.state && location.state.from && location.state.from.pathname) ||
     "/admin";
 
+  const { verifyWithBackend, setToken: setAuthToken } = useAuth();
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     (async () => {
       try {
-        const res = await fetch("/api/admin/verify", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
+        const ok = await verifyWithBackend(token);
+        if (!ok) {
           setError("Invalid token");
           return;
         }
-        const json = await res.json();
-        if (json && json.success) {
-          // verified by server — store locally and continue
-          localStorage.setItem("admin_token", token);
-          navigate(from, { replace: true });
-          return;
-        }
-        setError("Invalid token");
+        setAuthToken(token);
+        navigate(from, { replace: true });
       } catch (err) {
         console.error("verify error", err);
         setError("Network error");

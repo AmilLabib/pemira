@@ -5,7 +5,8 @@ import { Menu, X } from "lucide-react";
 
 const NAV_MENU = [
   { href: "/", label: "Beranda" },
-  { href: "/pendaftaran", label: "Pendaftaran" },
+  { href: "/daftar", label: "Pendaftaran" },
+  { href: "/daftar-calon", label: "Daftar Calon" },
 ];
 
 const Nav: React.FC = () => {

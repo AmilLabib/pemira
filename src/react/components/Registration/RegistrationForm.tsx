@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LoaderCircle } from "lucide-react";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -55,6 +55,9 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
   const [linkVideo, setLinkVideo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(null);
+  const nimRef = useRef<HTMLInputElement | null>(null);
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const positions = [
@@ -199,11 +202,22 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
     // POST to server API
     (async () => {
       try {
-        const res = await fetch("/api/registrations", {
+        const res = await fetch("/api/daftar", {
           method: "POST",
           body: data,
         });
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
+
+        if (res.status === 409) {
+          // duplicate NIM — show inline error on nim field and focus it
+          const msg = (json && json.error) || "NIM sudah terdaftar";
+          setErrors((prev) => ({ ...prev, nim: String(msg) }));
+          setIsSubmitting(false);
+          // focus the nim input for quick correction
+          nimRef.current?.focus();
+          return;
+        }
+
         if (!res.ok || !json.success) {
           // show server-side validation errors if provided
           if (json && json.error) {
@@ -242,7 +256,9 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
         }
         setErrors({});
         setIsSubmitting(false);
-        alert("Pendaftaran berhasil dikirim.");
+        // show transient success message (do not shift focus)
+        setSuccessMessage("Pendaftaran berhasil dikirim.");
+        setTimeout(() => setSuccessMessage(null), 4000);
       } catch (err: unknown) {
         console.error("submit error", String(err));
         setErrors((prev) => ({
@@ -293,8 +309,16 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
       <div>
         <label className="block text-sm font-medium">Nama Lengkap</label>
         <input
+          ref={nameRef}
           value={nama}
-          onChange={(e) => setNama(e.target.value)}
+          onChange={(e) => {
+            setNama(e.target.value);
+            setErrors((prev) => {
+              const next = { ...prev };
+              delete next.server;
+              return next;
+            });
+          }}
           className="mt-1 w-full rounded border px-3 py-2"
         />
         {errors.nama && (
@@ -306,8 +330,18 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
         <div>
           <label className="block text-sm font-medium">NIM</label>
           <input
+            ref={nimRef}
             value={nim}
-            onChange={(e) => setNim(e.target.value)}
+            onChange={(e) => {
+              setNim(e.target.value);
+              // clear nim-specific server error as user types
+              setErrors((prev) => {
+                const next = { ...prev };
+                delete next.nim;
+                delete next.server;
+                return next;
+              });
+            }}
             className="mt-1 w-full rounded border px-3 py-2"
           />
           {errors.nim && (
@@ -624,6 +658,13 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           />
         </div>
       </div>
+
+      {/* transient success message */}
+      {successMessage && (
+        <div className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
+          {successMessage}
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-2">
         <button
