@@ -10,7 +10,7 @@ const AdminLayout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="flex min-h-dvh flex-col bg-slate-50 lg:flex-row">
       {/* Top bar for mobile / small screens */}
       <header className="border-b border-slate-200 bg-white lg:hidden">
         <div className="mx-auto flex max-w-7xl items-center justify-between p-3">
@@ -47,7 +47,7 @@ const AdminLayout: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex h-full">
+      <div className="flex flex-1">
         {/* Sidebar */}
         <aside
           className={`fixed inset-y-0 left-0 z-30 w-64 transform border-r border-slate-200 bg-white p-4 transition-transform lg:static lg:translate-x-0 lg:border-r lg:border-slate-200 lg:bg-transparent lg:p-4 ${
