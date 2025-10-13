@@ -8,6 +8,7 @@ const AdminLayout: React.FC = () => {
   const auth = useAuth();
 
   const navItems = [
+    { to: "/admin", label: "Verifikasi Pemilih" },
     { to: "/admin/verifikasi", label: "Verifikasi Bakal Calon" },
     { to: "/admin/assign-number", label: "Assign Number" },
   ];
@@ -107,6 +108,7 @@ const AdminLayout: React.FC = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.to === "/admin"}
                 className={({ isActive }) =>
                   `block rounded px-2 py-1 text-slate-800 hover:bg-slate-100 ${
                     isActive ? "bg-slate-100 font-medium" : "text-slate-700"
