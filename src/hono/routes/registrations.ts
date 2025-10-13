@@ -40,7 +40,25 @@ registrations.post(
             message: `${fieldName} terlalu besar (maks ${MAX_FILE_SIZE} bytes)`,
           };
         }
-        const key = `registrations/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${entry.name}`;
+
+        // sanitize helper for path segments (remove slashes and unsafe chars)
+        const sanitize = (s: string) =>
+          s
+            .replace(/[/\\?%*:|"<>]+/g, "_") // remove path/control chars
+            .replace(/\s+/g, "_")
+            .replace(/_+/g, "_")
+            .replace(/^_+|_+$/g, "");
+
+        const now = new Date().toISOString().replace(/[:.]/g, "-");
+        const cleanPosisi = sanitize(posisi || "unknown");
+        const cleanNama = sanitize(nama || "unknown");
+        const cleanNim = sanitize(nim || "unknown");
+
+        // preserve extension when possible
+        const extMatch = entry.name.match(/(\.[^\.]+)$/);
+        const ext = extMatch ? extMatch[1] : "";
+
+        const key = `registrations/${cleanPosisi}/${fieldName}/${now}_${cleanNim}_${cleanNama}${ext}`;
         const ab = await entry.arrayBuffer();
         await c.env.BUCKET.put(key, ab, {
           httpMetadata: {

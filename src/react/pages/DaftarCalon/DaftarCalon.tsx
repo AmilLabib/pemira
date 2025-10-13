@@ -412,10 +412,26 @@ const DaftarCalon: React.FC = () => {
 
             <div className="mt-4">
               <div className="text-sm font-medium">Detail</div>
-              <div className="text-sm whitespace-pre-wrap">{
-                // show a few available fields
-                `Posisi: ${selected.posisi}\nNIM: ${selected.nim}\nKelas: ${selected.kelas}\nJurusan: ${selected.jurusan}\nDapil: ${selected.dapil ?? "-"}`
-              }</div>
+              <div className="text-sm whitespace-pre-wrap">
+                {
+                  // show a few available fields; hide dapil for presma/wapresma
+                  (() => {
+                    const lines = [
+                      `Posisi: ${selected.posisi}`,
+                      `NIM: ${selected.nim}`,
+                      `Kelas: ${selected.kelas}`,
+                      `Jurusan: ${selected.jurusan}`,
+                    ];
+                    if (
+                      selected.posisi !== "presma" &&
+                      selected.posisi !== "wapresma"
+                    ) {
+                      lines.push(`Dapil: ${selected.dapil ?? "-"}`);
+                    }
+                    return lines.join("\n");
+                  })()
+                }
+              </div>
             </div>
 
             {/* visi / misi / program kerja */}
