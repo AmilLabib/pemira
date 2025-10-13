@@ -58,16 +58,17 @@ function App() {
 
   return (
     <>
-      <div className="w-full p-8">
-        <div className="flex items-center">
+      <div className="container max-w-[85vw] overflow-hidden md:py-8 lg:mx-auto lg:w-full lg:px-4 lg:py-6">
+        <div className="flex gap-4 sm:flex-row sm:items-center">
           <div>
             <DashboardIcon />
           </div>
-          <h1 className="text-2xl font-semibold text-[#002a45]">
+          <h1 className="text-2xl font-semibold text-[#002a45] sm:text-3xl">
             Verifikasi Pemilih
           </h1>
         </div>
-        <div className="mt-4 flex w-full flex-row" style={{ gap: "2em" }}>
+
+        <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card
             header="Total Pemilih"
             number={totalVoters}

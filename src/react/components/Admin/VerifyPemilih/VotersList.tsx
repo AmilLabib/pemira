@@ -19,7 +19,18 @@ export default function VotersList({
   const [page, setPage] = useState(1);
   const [showUpload, setShowUpload] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const perPage = 10;
+  const [perPage, setPerPage] = useState<number>(() =>
+    typeof window !== "undefined" && window.innerWidth < 640 ? 5 : 10,
+  );
+
+  useEffect(() => {
+    function handleResize() {
+      setPerPage(window.innerWidth < 640 ? 5 : 10);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [voters, setVoters] = useState<any[]>(() =>
     typeof sample !== "undefined" ? [...sample] : [],
@@ -29,7 +40,6 @@ export default function VotersList({
     setPage(1);
   }, [filters]);
 
-  // notify parent (App) whenever total voters changes
   useEffect(() => {
     onCountChange?.(voters.length);
 
@@ -249,10 +259,10 @@ export default function VotersList({
           <h2 className="text-lg font-semibold">Voters List</h2>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-3 lg:flex">
           <button
             onClick={() => setShowUpload(true)}
-            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 text-white shadow hover:bg-blue-700 lg:px-4 lg:py-2"
             style={{ cursor: "pointer" }}
           >
             {/* upload icon */}
@@ -271,13 +281,13 @@ export default function VotersList({
               <polyline points="7 10 12 5 17 10" />
               <line x1="12" y1="5" x2="12" y2="19" />
             </svg>
-            Upload CSV
+            <span className="text-xs">Upload CSV</span>
           </button>
 
           <button
             type="button"
             onClick={exportToExcel}
-            className="inline-flex items-center gap-2 rounded-2xl bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700"
+            className="inline-flex items-center gap-2 rounded-2xl bg-green-600 text-white shadow hover:bg-green-700 lg:px-4 lg:py-2"
             style={{ cursor: "pointer" }}
           >
             {/* excel icon */}
@@ -298,10 +308,11 @@ export default function VotersList({
               />
               <rect x="8" y="5" width="8" height="2" fill="#21A366" />
             </svg>
-            Download Excel
+
+            <span className="text-xs">Download Excel</span>
           </button>
 
-          <div className="rounded-full bg-blue-500 px-3 py-1 text-sm text-white">
+          <div className="hidden rounded-full bg-blue-500 px-3 py-1 text-sm text-white lg:block">
             {voters.length} data found
           </div>
         </div>
@@ -398,15 +409,68 @@ export default function VotersList({
         </div>
       </div>
 
-      {/* Reset Data button */}
-      <div className="mt-6 flex justify-center">
-        <button
-          onClick={() => setShowReset(true)}
-          className="rounded-2xl border px-4 py-2 text-red-600 hover:bg-red-50"
-          title="Reset all voter data"
-        >
-          Reset Data
-        </button>
+      {/* Reset Data button + mobile actions (upload/export) */}
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="flex gap-3 lg:hidden">
+          <button
+            onClick={() => setShowUpload(true)}
+            className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-3 py-2 text-white shadow hover:bg-blue-700"
+            style={{ cursor: "pointer" }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 5 17 10" />
+              <line x1="12" y1="5" x2="12" y2="19" />
+            </svg>
+            <span className="text-xs">Upload CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={exportToExcel}
+            className="inline-flex items-center gap-2 rounded-2xl bg-green-600 px-3 py-2 text-white shadow hover:bg-green-700"
+            style={{ cursor: "pointer" }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" fill="#1D6F42" />
+              <path
+                d="M8 15L10 12L8 9M16 9L14 12L16 15"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <rect x="8" y="5" width="8" height="2" fill="#21A366" />
+            </svg>
+            <span className="text-xs">Download Excel</span>
+          </button>
+        </div>
+
+        <div>
+          <button
+            onClick={() => setShowReset(true)}
+            className="rounded-2xl border px-4 py-2 text-red-600 hover:bg-red-50"
+            title="Reset all voter data"
+          >
+            Reset Data
+          </button>
+        </div>
       </div>
 
       {/* Reset confirmation popup (separated component) */}

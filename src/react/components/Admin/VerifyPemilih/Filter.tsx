@@ -20,7 +20,7 @@ export default function FilterBar({ value, onApply }: Props) {
       jurusan: "All Jurusan",
       status: "All Status",
       search: "",
-    }
+    },
   );
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function FilterBar({ value, onApply }: Props) {
   }, [value]);
 
   const handleChange = (key: keyof FilterValues, val: string) => {
-    setFilters((prev) => ({ ...prev, [key]: val } as FilterValues));
+    setFilters((prev) => ({ ...prev, [key]: val }) as FilterValues);
   };
 
   const handleApply = () => {
@@ -37,17 +37,17 @@ export default function FilterBar({ value, onApply }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       {/* Header */}
-      <div className="flex items-center space-x-2 mb-3">
-        <div className="p-2 bg-gray-100 rounded ">
+      <div className="mb-3 flex items-center space-x-2">
+        <div className="rounded bg-gray-100 p-2">
           <Filter className="text-gray-700" size={18} />
         </div>
-        <h2 className="text-lg font-semibold text-gray-800 ml-2">Filters</h2>
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">Filters</h2>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200 my-3"></div>
+      <div className="my-3 border-t border-gray-200"></div>
 
       <form
         onSubmit={(e) => {
@@ -57,16 +57,16 @@ export default function FilterBar({ value, onApply }: Props) {
         className="flex flex-wrap items-center gap-4"
       >
         {/* Search */}
-        <div className="flex flex-col flex-1 min-w-[250px]">
-          <label className="text-sm font-medium text-gray-700 mb-1">
+        <div className="flex min-w-[250px] flex-1 flex-col">
+          <label className="mb-1 text-sm font-medium text-gray-700">
             Cari..
           </label>
-          <div className="flex items-center border border-gray-300 rounded-md px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400">
-            <Search size={16} className="text-gray-500 mr-2" />
+          <div className="flex items-center rounded-md border border-gray-300 px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400">
+            <Search size={16} className="mr-2 text-gray-500" />
             <input
               type="text"
-              placeholder="Search by name, email, or NIM..."
-              className="w-full text-sm text-gray-700 outline-none"
+              placeholder="Search by nama, token, or NIM..."
+              className="w-full border-none text-sm text-gray-700 outline-none focus-within:ring-0"
               value={filters.search}
               onChange={(e) => handleChange("search", e.target.value)}
             />
@@ -74,11 +74,11 @@ export default function FilterBar({ value, onApply }: Props) {
         </div>
         {/* Class */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 text-sm font-medium text-gray-700">
             Kelas
           </label>
           <select
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
             value={filters.class}
             onChange={(e) => handleChange("class", e.target.value)}
           >
@@ -90,11 +90,11 @@ export default function FilterBar({ value, onApply }: Props) {
 
         {/* Jurusan */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 text-sm font-medium text-gray-700">
             Jurusan
           </label>
           <select
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
             value={filters.jurusan}
             onChange={(e) => handleChange("jurusan", e.target.value)}
           >
@@ -116,11 +116,11 @@ export default function FilterBar({ value, onApply }: Props) {
 
         {/* Voting Status */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 text-sm font-medium text-gray-700">
             Status Voting
           </label>
           <select
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
             value={filters.status}
             onChange={(e) => handleChange("status", e.target.value)}
           >
@@ -133,7 +133,7 @@ export default function FilterBar({ value, onApply }: Props) {
         {/* Apply Button */}
         <button
           type="submit"
-          className="self-end bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+          className="flex items-center gap-2 self-end rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
           style={{ cursor: "pointer" }}
         >
           <Filter size={16} />

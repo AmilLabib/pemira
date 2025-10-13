@@ -36,7 +36,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className="rounded-2xl shadow-sm flex-1 h-32"
+      className="h-32 flex-1 rounded-2xl shadow-sm sm:w-full"
       style={{
         background: "linear-gradient(90deg,#58a2bd,#003f66)",
         padding: "1rem",
@@ -44,7 +44,7 @@ export default function Card({
     >
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-col text-[#f4f4f4]">
-          <div className="text-base text-left font-bold">{header}</div>
+          <div className="text-left text-base font-bold">{header}</div>
           {typeof progress === "number" && typeof total === "number" ? (
             <>
               {(() => {
@@ -53,13 +53,13 @@ export default function Card({
                 const pctClamped = Math.max(0, Math.min(100, pct));
                 return (
                   <>
-                    <div className="text-3xl text-left font-bold">
+                    <div className="text-left text-3xl font-bold">
                       {pctClamped}%
                     </div>
-                    <div className="w-40 mt-2">
-                      <div className="w-full bg-white/30 rounded-full h-3">
+                    <div className="mt-2 w-40">
+                      <div className="h-3 w-full rounded-full bg-white/30">
                         <div
-                          className="bg-white h-3 rounded-full"
+                          className="h-3 rounded-full bg-white"
                           style={{ width: `${pctClamped}%` }}
                           aria-valuenow={pctClamped}
                           aria-valuemin={0}
@@ -73,11 +73,11 @@ export default function Card({
               })()}
             </>
           ) : (
-            <div className="text-3xl text-left font-bold">{number}</div>
+            <div className="text-left text-3xl font-bold">{number}</div>
           )}
         </div>
-        <div className="flex items-center justify-center ml-4">
-          {icon === null ? null : icon ?? <DefaultIcon />}
+        <div className="ml-4 flex items-center justify-center">
+          {icon === null ? null : (icon ?? <DefaultIcon />)}
         </div>
       </div>
     </div>
