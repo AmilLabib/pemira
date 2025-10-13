@@ -6,6 +6,7 @@ import AdminLayout from "./components/Layout/AdminLayout";
 import ProtectedAdmin from "./components/Auth/ProtectedAdmin";
 import AdminLogin from "./pages/Admin/AdminLogin";
 import VerifyPage from "./pages/Admin/VerifyPage";
+import VerifyPemilih from "./pages/Admin/VerifyPemilih";
 import AssignNumber from "./pages/Admin/AssignNumber";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -31,7 +32,7 @@ const App: React.FC = () => {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedAdmin />}>
           <Route element={<AdminLayout />}>
-            <Route index element={<Navigate to="verifikasi" replace />} />
+            <Route index element={<VerifyPemilih />} />
             <Route path="verifikasi" element={<VerifyPage />} />
             <Route path="assign-number" element={<AssignNumber />} />
           </Route>
