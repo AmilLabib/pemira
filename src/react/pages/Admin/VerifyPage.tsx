@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import CandidateCard from "../../components/Admin/CandidateCard";
 
 type Candidate = {
@@ -27,14 +26,11 @@ const VerifyPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingKey, setFetchingKey] = useState<string | null>(null);
 
-  const auth = useAuth();
-
   const fetchCandidates = React.useCallback(async () => {
     setLoading(true);
     try {
-      const token = auth.token;
       const res = await fetch("/api/admin/bakal_calon", {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        credentials: "same-origin",
       });
       const json = await res.json();
       if (json.success) setCandidates(json.result || []);
@@ -43,18 +39,17 @@ const VerifyPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [auth.token]);
+  }, []);
 
   useEffect(() => {
     fetchCandidates();
-  }, [fetchCandidates]);
+  }, []);
 
   async function toggleVerify(nim: string) {
     try {
-      const token = auth.token;
       const res = await fetch(`/api/admin/bakal_calon/${nim}/verify`, {
         method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        credentials: "same-origin",
       });
       const json = await res.json();
       if (json.success) {
@@ -72,11 +67,10 @@ const VerifyPage: React.FC = () => {
   async function openFile(key: string) {
     try {
       setFetchingKey(key);
-      const token = auth.token;
       const res = await fetch(
         `/api/admin/file?key=${encodeURIComponent(key)}`,
         {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          credentials: "same-origin",
         },
       );
       if (!res.ok) {
@@ -118,15 +112,9 @@ const VerifyPage: React.FC = () => {
                 )
                   return;
                 try {
-                  const token = auth.token;
                   const res = await fetch(
                     `/api/admin/bakal_calon/${encodeURIComponent(nim)}`,
-                    {
-                      method: "DELETE",
-                      headers: token
-                        ? { Authorization: `Bearer ${token}` }
-                        : undefined,
-                    },
+                    { method: "DELETE", credentials: "same-origin" },
                   );
                   const json = await res.json();
                   if (json.success) {

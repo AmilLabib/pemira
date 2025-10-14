@@ -4,14 +4,14 @@ import { useAuth } from "../../hooks/useAuth";
 
 const ProtectedAdmin: React.FC = () => {
   const location = useLocation();
-  const { token, verifyWithBackend } = useAuth();
+  const { verifyWithBackend } = useAuth();
   const [checking, setChecking] = useState(true);
   const [verified, setVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const ok = await verifyWithBackend(token);
+      const ok = await verifyWithBackend();
       if (!mounted) return;
       setVerified(ok);
       setChecking(false);
@@ -19,7 +19,7 @@ const ProtectedAdmin: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [token, verifyWithBackend]);
+  }, [verifyWithBackend]);
 
   if (checking) {
     // simple placeholder while verifying; keep minimal to avoid layout shift
