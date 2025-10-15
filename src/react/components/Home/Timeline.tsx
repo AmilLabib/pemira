@@ -1,3 +1,5 @@
+import Ribbon from "../DaftarCalon/Ribbon";
+
 const events = [
   {
     date: "11/3/2025",
@@ -21,10 +23,11 @@ const events = [
 const Timeline: React.FC = () => (
   <section
     id="timeline"
-    className="my-16 flex scroll-mt-16 flex-col gap-12 px-8"
+    className="flex w-[90vw] flex-col gap-8 overflow-hidden pt-16 lg:w-[80vw]"
+    style={{ marginLeft: "auto", marginRight: "auto" }}
   >
-    <h2 className="text-center text-3xl font-bold">Lini Masa Pemira</h2>
-    <ul className="flex flex-col">
+    <Ribbon>Timeline Pemilihan Raya 2025</Ribbon>
+    <ul className="flex flex-col rounded-xl bg-white p-8 opacity-90">
       {events.map((event, idx, array) => (
         <li
           key={event.date}

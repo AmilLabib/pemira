@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import logo from "../../assets/logo.webp";
 import { Menu, X } from "lucide-react";
 
@@ -7,11 +7,15 @@ const NAV_MENU = [
   { href: "/", label: "Beranda" },
   { href: "/daftar", label: "Pendaftaran" },
   { href: "/daftar-calon", label: "Daftar Calon" },
+  { href: "/pemilihan", label: "Pemilihan" },
+  { href: "/faq", label: "FAQ" },
 ];
 
 const Nav: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const onScroll = () => {
@@ -23,24 +27,38 @@ const Nav: React.FC = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 z-50 w-full text-white backdrop-blur transition-colors ${
-        scrolled ? "bg-blue-900/75" : "bg-transparent"
+      className={`fixed top-0 left-0 z-50 w-full text-white ${
+        // transparent header on the home page; other routes always show the scrolled style
+        isHome
+          ? scrolled
+            ? "bg-[#102a71]/75 backdrop-blur"
+            : "border-none bg-transparent"
+          : "bg-[#102a71]"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between border-b border-blue-900/25 p-4">
-        <div className="flex items-center gap-3">
+      <div
+        className={`container mx-auto flex items-center justify-between ${scrolled || !isHome ? "border-b border-blue-900/25" : ""} px-8 py-4`}
+      >
+        <div className="flex items-center gap-2">
           <img
             src={logo}
             alt="Logo"
-            className="size-10 rounded-full bg-white p-0.5"
+            className="size-8 rounded-full bg-white p-0.5 lg:size-10"
           />
-          <span className="text-lg font-bold">PEMIRA PKN STAN</span>
+          <div className="flex flex-col">
+            <h1 className="font-league text-sm font-bold lg:text-lg">
+              Pemilihan Raya
+            </h1>
+            <h1 className="font-poppins font-regular -mt-1 text-xs lg:text-sm">
+              Politeknik Keuangan Negara STAN
+            </h1>
+          </div>
         </div>
         <nav className="hidden md:block">
-          <ul className="flex gap-6 font-medium">
+          <ul className="font-poppins font-regular flex gap-6">
             {NAV_MENU.map((item) => (
               <li key={item.href}>
-                <Link to={item.href} className="hover:underline">
+                <Link to={item.href} className="hover:opacity-80">
                   {item.label}
                 </Link>
               </li>
@@ -50,7 +68,10 @@ const Nav: React.FC = () => {
         <button
           className="md:hidden"
           aria-label="Toggle Menu"
-          onClick={() => setMenuOpen((open) => !open)}
+          onClick={() => {
+            setMenuOpen((open) => !open);
+            if (!menuOpen) setScrolled(true);
+          }}
         >
           {menuOpen ? <X /> : <Menu />}
         </button>

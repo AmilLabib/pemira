@@ -64,10 +64,10 @@ const Carousel: React.FC<CarouselProps> = ({
   };
 
   return (
-    <div>
+    <div className="mx-auto w-[90vw] rounded-xl bg-white py-8 opacity-90 lg:w-[80vw]">
       <div
         ref={containerRef}
-        className="relative mx-auto aspect-video w-full max-w-4xl overflow-hidden rounded-xl"
+        className="relative mx-auto aspect-video w-[90%] overflow-hidden rounded-2xl"
       >
         {slides.map((s, i) => (
           <div
