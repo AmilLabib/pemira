@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import Ribbon from "../../components/DaftarCalon/Ribbon";
 
 type Candidate = {
   posisi: string;
@@ -147,36 +148,75 @@ const DaftarCalon: React.FC = () => {
   // fixed dapil navigation (always show these 4)
   const DAPILS = ["Dapil I", "Dapil II", "Dapil III", "Dapil IV"];
   const [selectedDapil, setSelectedDapil] = useState<string>(DAPILS[0]);
+  const tabsRef = useRef<HTMLDivElement | null>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    left: number;
+    width: number;
+  }>({ left: 0, width: 0 });
+
+  // position the indicator under the active tab and scroll it into view
+  useEffect(() => {
+    let raf = 0;
+    let attempts = 0;
+
+    const tryPosition = () => {
+      attempts += 1;
+      const tabEl = buttonRefs.current[selectedDapil];
+      const container = tabsRef.current;
+      if (!tabEl || !container) {
+        if (attempts < 10) {
+          raf = requestAnimationFrame(tryPosition);
+        } else {
+          setIndicatorStyle({ left: 0, width: 0 });
+        }
+        return;
+      }
+
+      const left = tabEl.offsetLeft;
+      const width = tabEl.offsetWidth;
+      setIndicatorStyle({ left, width });
+
+      const targetScroll = Math.max(
+        0,
+        left - container.clientWidth / 2 + width / 2,
+      );
+      container.scrollTo({ left: targetScroll, behavior: "smooth" });
+    };
+
+    tryPosition();
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [selectedDapil]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-4 text-center text-2xl font-bold">
-        Daftar Calon Terverifikasi
-      </h1>
+    <div className="container mx-auto mt-12 max-w-full overflow-hidden bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center px-4 py-8">
+      <div className="mt-8">
+        <Ribbon>CALON PRESMA DAN WAPRESMA</Ribbon>
+      </div>
       {loading ? (
         <div>Loading…</div>
       ) : (
         <div className="space-y-8">
           <section>
-            <h2 className="mb-2 text-center text-xl font-semibold">
-              Presma & Wapresma
-            </h2>
             {pairs.length === 0 ? (
               <div>Tidak ada pasangan terverifikasi dengan nomor.</div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 md:grid-cols-3 lg:gap-6">
                 {pairs.map((p) => (
                   <div
                     key={p.number}
-                    className="rounded border bg-white p-4 shadow-sm transition hover:shadow-md"
+                    className="relative mt-8 rounded-xl bg-white p-4 shadow-lg transition hover:shadow-md"
                   >
-                    <div className="text-center text-sm text-gray-500">
-                      Nomor {p.number}
+                    <div className="font-league absolute top-3 left-3 rounded-xl bg-[#102a71] px-2 py-0.5 text-lg font-bold text-white shadow">
+                      No {p.number}
                     </div>
 
                     {/* 2-column layout: presma left, wapresma right */}
                     <div className="mt-3 grid grid-cols-2 items-start gap-4 md:grid-cols-2">
-                      {/** Ensure two cards (presma left, wapresma right). We'll map and place by posisi. **/}
+                      {/* Presma */}
                       <div className="md:col-span-1">
                         {p.pair
                           .filter((c) => c.posisi === "presma")
@@ -186,38 +226,39 @@ const DaftarCalon: React.FC = () => {
                               className="flex flex-col items-center gap-3 text-center"
                             >
                               {imageLoading[c.nim] ? (
-                                <div className="h-40 w-28 animate-pulse rounded-md bg-gray-200" />
+                                <div className="mt-8 h-48 w-36 animate-pulse rounded-md bg-gray-200 lg:h-60 lg:w-45" />
                               ) : imageUrls[c.nim] ? (
                                 <img
                                   src={imageUrls[c.nim]}
                                   alt={c.nama}
-                                  className="mx-auto h-40 w-28 rounded-md object-cover"
+                                  className="mx-auto mt-8 h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
                                   style={{ objectPosition: "center center" }}
                                 />
                               ) : c.foto && imageError[c.nim] ? (
-                                <div className="flex h-40 w-28 items-center justify-center rounded-md bg-red-100 text-xs text-red-600">
+                                <div className="flex h-48 w-36 items-center justify-center rounded-md bg-red-100 text-xs text-red-600 lg:h-60 lg:w-45">
                                   Err
                                 </div>
                               ) : c.foto ? (
                                 <img
                                   src={c.foto}
                                   alt={c.nama}
-                                  className="mx-auto h-40 w-28 rounded-md object-cover"
+                                  className="mx-auto mt-8 h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
                                   style={{ objectPosition: "center center" }}
                                 />
                               ) : (
-                                <div className="h-40 w-28 rounded-md bg-gray-200" />
+                                <div className="h-60 w-45 rounded-md bg-gray-200" />
                               )}
 
                               <div className="mt-2 flex w-full flex-col items-center">
                                 <div className="font-medium">{c.nama}</div>
                                 <div className="text-sm text-gray-600">
-                                  {c.nim}
+                                  {c.jurusan}
                                 </div>
                                 <div className="mt-2">
                                   <button
-                                    className="rounded bg-slate-100 px-3 py-1 text-sm"
+                                    className="rounded bg-slate-100 px-3 py-1 text-sm hover:bg-slate-300"
                                     onClick={() => setSelected(c)}
+                                    style={{ cursor: "pointer" }}
                                   >
                                     Details
                                   </button>
@@ -227,6 +268,7 @@ const DaftarCalon: React.FC = () => {
                           ))}
                       </div>
 
+                      {/* Wapresma */}
                       <div className="md:col-span-1">
                         {p.pair
                           .filter((c) => c.posisi === "wapresma")
@@ -236,38 +278,39 @@ const DaftarCalon: React.FC = () => {
                               className="flex flex-col items-center gap-3 text-center"
                             >
                               {imageLoading[c.nim] ? (
-                                <div className="h-40 w-28 animate-pulse rounded-md bg-gray-200" />
+                                <div className="mt-8 h-48 w-36 animate-pulse rounded-md bg-gray-200 lg:h-60 lg:w-45" />
                               ) : imageUrls[c.nim] ? (
                                 <img
                                   src={imageUrls[c.nim]}
                                   alt={c.nama}
-                                  className="mx-auto h-40 w-28 rounded-md object-cover"
+                                  className="mx-auto h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
                                   style={{ objectPosition: "center center" }}
                                 />
                               ) : c.foto && imageError[c.nim] ? (
-                                <div className="flex h-40 w-28 items-center justify-center rounded-md bg-red-100 text-xs text-red-600">
+                                <div className="flex h-48 w-36 items-center justify-center rounded-md bg-red-100 text-xs text-red-600 lg:h-60 lg:w-45">
                                   Err
                                 </div>
                               ) : c.foto ? (
                                 <img
                                   src={c.foto}
                                   alt={c.nama}
-                                  className="mx-auto h-40 w-28 rounded-md object-cover"
+                                  className="mx-auto h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
                                   style={{ objectPosition: "center center" }}
                                 />
                               ) : (
-                                <div className="h-40 w-28 rounded-md bg-gray-200" />
+                                <div className="h-48 w-36 rounded-md bg-gray-200 lg:h-60 lg:w-45" />
                               )}
 
                               <div className="mt-2 flex w-full flex-col items-center">
                                 <div className="font-medium">{c.nama}</div>
                                 <div className="text-sm text-gray-600">
-                                  {c.nim}
+                                  {c.jurusan}
                                 </div>
                                 <div className="mt-2">
                                   <button
-                                    className="rounded bg-slate-100 px-3 py-1 text-sm"
+                                    className="rounded bg-slate-100 px-3 py-1 text-sm hover:bg-slate-300"
                                     onClick={() => setSelected(c)}
+                                    style={{ cursor: "pointer" }}
                                   >
                                     Details
                                   </button>
@@ -284,25 +327,46 @@ const DaftarCalon: React.FC = () => {
           </section>
 
           <section>
-            <h2 className="mb-2 text-center text-xl font-semibold">
-              Anggota BLM
-            </h2>
+            <Ribbon>CALON ANGGOTA BLM</Ribbon>
             {anggotaByDapil.length === 0 ? (
               <div>Tidak ada anggota BLM terverifikasi.</div>
             ) : (
               <div className="space-y-4">
-                {/* dapil navigation */}
-                <div className="flex flex-wrap gap-2">
+                {/* dapil navigation - horizontal sliding tabs */}
+                <div className="mt-4">
+                  <div
+                    ref={tabsRef}
+                    className="scrollbar-hide relative -mx-2 overflow-x-auto px-2"
+                    style={{
+                      WebkitOverflowScrolling: "touch",
+                    }}
+                  >
+                    <div className="flex w-full items-center justify-center gap-3 md:justify-between md:gap-0">
                   {DAPILS.map((dapil) => (
                     <button
                       key={dapil}
-                      className={`rounded px-3 py-1 text-sm ${dapil === selectedDapil ? "bg-slate-200 font-semibold" : "bg-slate-50 hover:bg-slate-100"}`}
+                          ref={(el) => {
+                            buttonRefs.current[dapil] = el;
+                          }}
+                          className={`cursor-pointer rounded-t-md px-4 py-3 text-sm whitespace-nowrap md:flex-1 md:text-center ${dapil === selectedDapil ? "font-semibold text-yellow-400" : "text-white"}`}
                       onClick={() => setSelectedDapil(dapil)}
                       aria-pressed={dapil === selectedDapil}
                     >
                       {dapil}
                     </button>
                   ))}
+                </div>
+
+                    <div className="absolute right-0 bottom-0 left-0 h-0.5 bg-slate-200" />
+
+                    <div
+                      className="absolute bottom-0 h-1 rounded bg-yellow-400 transition-all duration-300"
+                      style={{
+                        left: indicatorStyle.left,
+                        width: indicatorStyle.width,
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* show only selected dapil */}
@@ -319,16 +383,16 @@ const DaftarCalon: React.FC = () => {
                         {list.map((c) => (
                           <div
                             key={c.nim}
-                            className="flex flex-col items-start gap-3 rounded border bg-white p-3 shadow-sm"
+                            className="flex flex-col items-start gap-3 rounded bg-white p-3 shadow-xl"
                           >
                             <div className="flex w-full items-center gap-3">
                               {imageLoading[c.nim] ? (
-                                <div className="h-20 w-14 animate-pulse rounded-md bg-gray-200" />
+                                <div className="h-28 w-21 animate-pulse rounded-md bg-gray-200" />
                               ) : imageUrls[c.nim] ? (
                                 <img
                                   src={imageUrls[c.nim]}
                                   alt={c.nama}
-                                  className="h-20 w-14 rounded-md object-cover"
+                                  className="h-28 w-21 rounded-md object-cover"
                                   style={{ objectPosition: "center center" }}
                                 />
                               ) : c.foto && imageError[c.nim] ? (
@@ -339,17 +403,17 @@ const DaftarCalon: React.FC = () => {
                                 <img
                                   src={c.foto}
                                   alt={c.nama}
-                                  className="h-20 w-14 rounded-md object-cover"
+                                  className="h-28 w-21 rounded-md object-cover"
                                   style={{ objectPosition: "center center" }}
                                 />
                               ) : (
-                                <div className="h-20 w-14 rounded-md bg-gray-200" />
+                                <div className="h-28 w-21 rounded-md bg-gray-200" />
                               )}
 
                               <div className="flex-1">
                                 <div className="font-medium">{c.nama}</div>
                                 <div className="text-sm text-gray-600">
-                                  Nomor {c.ticket_number ?? "-"} • {c.nim}
+                                  {c.kelas ?? "-"}
                                 </div>
                               </div>
                             </div>

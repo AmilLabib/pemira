@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { LoaderCircle } from "lucide-react";
+import FileInput from "./FileInput";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -286,366 +287,257 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium">Posisi yang dipilih</label>
-        <select
-          value={posisi}
-          onChange={(e) => setPosisi(e.target.value as PositionType)}
-          className="mt-1 w-full rounded border px-3 py-2"
-        >
-          <option value="">-- Pilih Posisi --</option>
-          {positions.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-        {errors.posisi && (
-          <div className="text-sm text-red-600">{errors.posisi}</div>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium">Nama Lengkap</label>
-        <input
-          ref={nameRef}
-          value={nama}
-          onChange={(e) => {
-            setNama(e.target.value);
-            setErrors((prev) => {
-              const next = { ...prev };
-              delete next.server;
-              return next;
-            });
-          }}
-          className="mt-1 w-full rounded border px-3 py-2"
-        />
-        {errors.nama && (
-          <div className="text-sm text-red-600">{errors.nama}</div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <form
+      onSubmit={handleSubmit}
+      className="mx-auto w-[90vw] rounded-2xl bg-white p-6 shadow-lg lg:max-w-2/3"
+    >
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium">NIM</label>
+          <label className="block text-sm font-medium">
+            Posisi yang dipilih
+          </label>
+          <select
+            value={posisi}
+            onChange={(e) => setPosisi(e.target.value as PositionType)}
+            className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-sm text-white focus:outline-none lg:text-lg"
+          >
+            <option value="">-- Pilih Posisi --</option>
+            {positions.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+          {errors.posisi && (
+            <div className="text-sm text-red-600">{errors.posisi}</div>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Nama Lengkap</label>
           <input
-            ref={nimRef}
-            value={nim}
+            ref={nameRef}
+            value={nama}
             onChange={(e) => {
-              setNim(e.target.value);
-              // clear nim-specific server error as user types
+              setNama(e.target.value);
               setErrors((prev) => {
                 const next = { ...prev };
-                delete next.nim;
                 delete next.server;
                 return next;
               });
             }}
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
           />
-          {errors.nim && (
-            <div className="text-sm text-red-600">{errors.nim}</div>
+          {errors.nama && (
+            <div className="text-sm text-red-600">{errors.nama}</div>
           )}
         </div>
-        <div>
-          <label className="block text-sm font-medium">Kelas</label>
-          <input
-            value={kelas}
-            onChange={(e) => setKelas(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
-          />
-          {errors.kelas && (
-            <div className="text-sm text-red-600">{errors.kelas}</div>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Jurusan</label>
-          <select
-            value={jurusan}
-            onChange={(e) => setJurusan(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
-          >
-            <option value="">-- Pilih Jurusan --</option>
-            {jurusans.map((j) => (
-              <option key={j} value={j}>
-                {j}
-              </option>
-            ))}
-          </select>
-          {errors.jurusan && (
-            <div className="text-sm text-red-600">{errors.jurusan}</div>
-          )}
-        </div>
-      </div>
 
-      {/* Dapil — visible for anggota_blm */}
-      {posisi === "anggota_blm" && (
-        <div>
-          <label className="block text-sm font-medium">Dapil</label>
-          <input
-            value={dapil}
-            readOnly
-            className="mt-1 w-full rounded border bg-slate-50 px-3 py-2"
-          />
-          {errors.dapil && (
-            <div className="text-sm text-red-600">{errors.dapil}</div>
-          )}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div>
+            <label className="block text-sm font-medium">NIM</label>
+            <input
+              ref={nimRef}
+              value={nim}
+              onChange={(e) => {
+                setNim(e.target.value);
+                // clear nim-specific server error as user types
+                setErrors((prev) => {
+                  const next = { ...prev };
+                  delete next.nim;
+                  delete next.server;
+                  return next;
+                });
+              }}
+              className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            />
+            {errors.nim && (
+              <div className="text-sm text-red-600">{errors.nim}</div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Kelas</label>
+            <input
+              value={kelas}
+              onChange={(e) => setKelas(e.target.value)}
+              className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            />
+            {errors.kelas && (
+              <div className="text-sm text-red-600">{errors.kelas}</div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Jurusan</label>
+            <select
+              value={jurusan}
+              onChange={(e) => setJurusan(e.target.value)}
+              className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-sm text-white focus:outline-none lg:text-lg"
+            >
+              <option value="">-- Pilih Jurusan --</option>
+              {jurusans.map((j) => (
+                <option key={j} value={j}>
+                  {j}
+                </option>
+              ))}
+            </select>
+            {errors.jurusan && (
+              <div className="text-sm text-red-600">{errors.jurusan}</div>
+            )}
+          </div>
         </div>
-      )}
 
-      <div>
-        <label className="block text-sm font-medium">Visi</label>
-        <textarea
-          value={visi}
-          onChange={(e) => setVisi(e.target.value)}
-          className="mt-1 w-full rounded border px-3 py-2"
-        />
-        {errors.visi && (
-          <div className="text-sm text-red-600">{errors.visi}</div>
+        {/* Dapil — visible for anggota_blm */}
+        {posisi === "anggota_blm" && (
+          <div>
+            <label className="block text-sm font-medium">Dapil</label>
+            <input
+              value={dapil}
+              readOnly
+              className="mt-2 w-full rounded-lg bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            />
+            {errors.dapil && (
+              <div className="text-sm text-red-600">{errors.dapil}</div>
+            )}
+          </div>
         )}
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium">Misi</label>
-        <textarea
-          value={misi}
-          onChange={(e) => setMisi(e.target.value)}
-          className="mt-1 w-full rounded border px-3 py-2"
-        />
-        {errors.misi && (
-          <div className="text-sm text-red-600">{errors.misi}</div>
-        )}
-      </div>
-
-      {/* Program Kerja — only for presma/wapresma */}
-      {(posisi === "presma" || posisi === "wapresma") && (
         <div>
-          <label className="block text-sm font-medium">Program Kerja</label>
+          <label className="block text-sm font-medium">Visi</label>
           <textarea
-            value={programKerja}
-            onChange={(e) => setProgramKerja(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
+            value={visi}
+            onChange={(e) => setVisi(e.target.value)}
+            className="mt-2 min-h-[80px] w-full rounded-lg bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
           />
-          {errors.programKerja && (
-            <div className="text-sm text-red-600">{errors.programKerja}</div>
+          {errors.visi && (
+            <div className="text-sm text-red-600">{errors.visi}</div>
           )}
         </div>
-      )}
 
-      {/* File uploads — shared with some position-specific files */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium">
-            Kartu Tanda Mahasiswa (KTM) — max 10MB
-          </label>
-          <div className="mt-1 flex items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200">
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => handleFileChange(e, setKtm, "ktm")}
-                className="sr-only"
-              />
-              <span>Choose file</span>
-            </label>
-            <div className="text-sm text-slate-600">
-              {ktm ? (
-                `${ktm.name} (${formatFileSize(ktm.size)})`
-              ) : (
-                <span className="text-slate-400">No file selected</span>
-              )}
-            </div>
+          <label className="block text-sm font-medium">Misi</label>
+          <textarea
+            value={misi}
+            onChange={(e) => setMisi(e.target.value)}
+            className="mt-2 min-h-[80px] w-full rounded-lg bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+          />
+          {errors.misi && (
+            <div className="text-sm text-red-600">{errors.misi}</div>
+          )}
+        </div>
+
+        {/* Program Kerja — only for presma/wapresma */}
+        {(posisi === "presma" || posisi === "wapresma") && (
+          <div>
+            <label className="block text-sm font-medium">Program Kerja</label>
+            <textarea
+              value={programKerja}
+              onChange={(e) => setProgramKerja(e.target.value)}
+              className="mt-1 w-full rounded border bg-[#0b2b5a] px-3 py-2 text-white focus:outline-none"
+            />
+            {errors.programKerja && (
+              <div className="text-sm text-red-600">{errors.programKerja}</div>
+            )}
           </div>
-          {errors.ktm && (
-            <div className="text-sm text-red-600">{errors.ktm}</div>
-          )}
-        </div>
+        )}
 
-        <div>
-          <label className="block text-sm font-medium">
-            Surat Pernyataan (Upload) — max 10MB
-          </label>
-          <div className="mt-1 flex items-center gap-3">
-            <a
-              className="text-sm text-sky-600"
-              href="#"
-              onClick={(e) => e.preventDefault()}
-            >
-              Download template
-            </a>
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200">
-              <input
-                type="file"
+        {/* File uploads — shared with some position-specific files */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            {/* KTM */}
+            <FileInput
+              id="ktm"
+              label="Kartu Tanda Mahasiswa (KTM) — max 10MB"
+              accept="image/*,application/pdf"
+              file={ktm}
+              onFileChange={(e) => handleFileChange(e, setKtm, "ktm")}
+              error={errors.ktm}
+            />
+          </div>
+
+          {/* Surat Pernyataan */}
+          <div>
+            <FileInput
+              id="surat"
+              label="Surat Pernyataan (Upload) — max 10MB"
+              accept="application/pdf"
+              file={suratPernyataan}
+              onFileChange={(e) =>
+                handleFileChange(e, setSuratPernyataan, "suratPernyataan")
+              }
+              showTemplate
+              templateHref="#"
+              templateText="Download template"
+              error={errors.suratPernyataan}
+            />
+          </div>
+
+          {/* Curriculum Vitae (CV) */}
+          <div>
+            <FileInput
+              id="cv"
+              label="Curriculum Vitae (CV) — max 10MB"
+              accept="application/pdf"
+              file={cv}
+              onFileChange={(e) => handleFileChange(e, setCv, "cv")}
+              error={errors.cv}
+            />
+          </div>
+
+          {/* Formulir pernyataan dukungan — only for presma/wapresma */}
+          {(posisi === "presma" || posisi === "wapresma") && (
+            <div>
+              <FileInput
+                id="dukungan"
+                label="Formulir Pernyataan Dukungan (Upload) — max 10MB"
                 accept="application/pdf"
-                onChange={(e) =>
-                  handleFileChange(e, setSuratPernyataan, "suratPernyataan")
+                file={formulirDukungan}
+                onFileChange={(e) =>
+                  handleFileChange(e, setFormulirDukungan, "formulirDukungan")
                 }
-                className="sr-only"
+                showTemplate
+                templateHref="#"
+                templateText="Download template"
+                error={errors.formulirDukungan}
               />
-              <span>Choose file</span>
-            </label>
-            <div className="text-sm text-slate-600">
-              {suratPernyataan ? (
-                `${suratPernyataan.name} (${formatFileSize(suratPernyataan.size)})`
-              ) : (
-                <span className="text-slate-400">No file selected</span>
-              )}
             </div>
-          </div>
-          {errors.suratPernyataan && (
-            <div className="text-sm text-red-600">{errors.suratPernyataan}</div>
           )}
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium">
-            Curriculum Vitae (CV) — max 10MB
-          </label>
-          <div className="mt-1 flex items-center gap-3">
-            <a
-              className="text-sm text-sky-600"
-              href="#"
-              onClick={(e) => e.preventDefault()}
-            >
-              Download template
-            </a>
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200">
-              <input
-                type="file"
+          {/* Formulir pendaftaran tim sukses — only for presma/wapresma */}
+          {(posisi === "presma" || posisi === "wapresma") && (
+            <div>
+              <FileInput
+                id="tim"
+                label="Formulir Pendaftaran Tim Sukses (Upload) — max 10MB"
                 accept="application/pdf"
-                onChange={(e) => handleFileChange(e, setCv, "cv")}
-                className="sr-only"
+                file={formulirTim}
+                onFileChange={(e) =>
+                  handleFileChange(e, setFormulirTim, "formulirTim")
+                }
+                showTemplate
+                templateHref="#"
+                templateText="Download template"
+                error={errors.formulirTim}
               />
-              <span>Choose file</span>
-            </label>
-            <div className="text-sm text-slate-600">
-              {cv ? (
-                `${cv.name} (${formatFileSize(cv.size)})`
-              ) : (
-                <span className="text-slate-400">No file selected</span>
-              )}
             </div>
-          </div>
-          {errors.cv && <div className="text-sm text-red-600">{errors.cv}</div>}
-        </div>
-
-        {/* Formulir pernyataan dukungan — only for presma/wapresma */}
-        {(posisi === "presma" || posisi === "wapresma") && (
-          <div>
-            <label className="block text-sm font-medium">
-              Formulir Pernyataan Dukungan (Upload) — max 10MB
-            </label>
-            <div className="mt-1 flex items-center gap-3">
-              <a
-                className="text-sm text-sky-600"
-                href="#"
-                onClick={(e) => e.preventDefault()}
-              >
-                Download template
-              </a>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200">
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) =>
-                    handleFileChange(e, setFormulirDukungan, "formulirDukungan")
-                  }
-                  className="sr-only"
-                />
-                <span>Choose file</span>
-              </label>
-              <div className="text-sm text-slate-600">
-                {formulirDukungan ? (
-                  `${formulirDukungan.name} (${formatFileSize(formulirDukungan.size)})`
-                ) : (
-                  <span className="text-slate-400">No file selected</span>
-                )}
-              </div>
-            </div>
-            {errors.formulirDukungan && (
-              <div className="text-sm text-red-600">
-                {errors.formulirDukungan}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Formulir pendaftaran tim sukses — only for presma/wapresma */}
-        {(posisi === "presma" || posisi === "wapresma") && (
-          <div>
-            <label className="block text-sm font-medium">
-              Formulir Pendaftaran Tim Sukses (Upload) — max 10MB
-            </label>
-            <div className="mt-1 flex items-center gap-3">
-              <a
-                className="text-sm text-sky-600"
-                href="#"
-                onClick={(e) => e.preventDefault()}
-              >
-                Download template
-              </a>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200">
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) =>
-                    handleFileChange(e, setFormulirTim, "formulirTim")
-                  }
-                  className="sr-only"
-                />
-                <span>Choose file</span>
-              </label>
-              <div className="text-sm text-slate-600">
-                {formulirTim ? (
-                  `${formulirTim.name} (${formatFileSize(formulirTim.size)})`
-                ) : (
-                  <span className="text-slate-400">No file selected</span>
-                )}
-              </div>
-            </div>
-            {errors.formulirTim && (
-              <div className="text-sm text-red-600">{errors.formulirTim}</div>
-            )}
-          </div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium">
-            Pas Foto 4x6 — max 10MB
-          </label>
-          <div className="mt-1 flex items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded bg-slate-100 px-3 py-1 text-sm text-slate-700 hover:bg-slate-200">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, setFoto, "foto")}
-                className="sr-only"
-              />
-              <span>Choose file</span>
-            </label>
-            <div className="flex items-center gap-3">
-              <div className="text-sm text-slate-600">
-                {foto ? (
-                  `${foto.name} (${formatFileSize(foto.size)})`
-                ) : (
-                  <span className="text-slate-400">No file selected</span>
-                )}
-              </div>
-              {fotoPreviewUrl && (
-                <img
-                  src={fotoPreviewUrl}
-                  alt="Preview foto"
-                  className="h-20 w-20 rounded object-cover"
-                />
-              )}
-            </div>
-          </div>
-          {errors.foto && (
-            <div className="text-sm text-red-600">{errors.foto}</div>
           )}
-        </div>
 
+          {/* Pas Foto 4x6 */}
+          <div>
+            <FileInput
+              id="foto"
+              label="Pas Foto 4x6 — max 10MB"
+              accept="image/*"
+              file={foto}
+              previewUrl={fotoPreviewUrl}
+              onFileChange={(e) => handleFileChange(e, setFoto, "foto")}
+              error={errors.foto}
+            />
+          </div>
+        </div>
+        {/* note about max file size (uses formatFileSize to avoid unused warning) */}
+        <div className="text-sm text-gray-300">
+          Ukuran maksimal berkas: {formatFileSize(MAX_FILE_SIZE)}
+        </div>
         <div>
           <label className="block text-sm font-medium">
             Tautan Video Perkenalan
@@ -653,34 +545,33 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           <input
             value={linkVideo}
             onChange={(e) => setLinkVideo(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
             placeholder="https://youtube.com/..."
           />
         </div>
-      </div>
-
-      {/* transient success message */}
-      {successMessage && (
-        <div className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
-          {successMessage}
+        {/* transient success message */}
+        {successMessage && (
+          <div className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
+            {successMessage}
+          </div>
+        )}
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`mt-6 w-40 rounded-full py-3 font-bold text-[#23408e] ${isSubmitting ? "cursor-not-allowed bg-[#f0d97a] opacity-60" : "bg-[#fed258] hover:opacity-90"}`}
+            style={{ cursor: "pointer" }}
+          >
+            {isSubmitting ? (
+              <span className="inline-flex items-center gap-2">
+                <LoaderCircle className="h-4 w-4 animate-spin text-[#23408e]" />
+                Mengirim...
+              </span>
+            ) : (
+              "SUBMIT"
+            )}
+          </button>
         </div>
-      )}
-
-      <div className="flex items-center justify-end gap-2">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`rounded px-4 py-2 text-white ${isSubmitting ? "cursor-not-allowed bg-slate-400" : "bg-sky-600 hover:bg-sky-700"}`}
-        >
-          {isSubmitting ? (
-            <span className="inline-flex items-center gap-2">
-              <LoaderCircle className="h-4 w-4 animate-spin text-white" />
-              Mengirim...
-            </span>
-          ) : (
-            "Kirim Pendaftaran"
-          )}
-        </button>
       </div>
     </form>
   );

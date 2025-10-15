@@ -1,2 +1,37 @@
+/* Fade transition for route changes */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 500ms;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 500ms;
+}
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap");
 @import "tailwindcss";
 @plugin "@tailwindcss/forms";
+
+:root {
+  /* CSS variable to reference the display font (League Spartan) */
+  --font-display:
+    "League Spartan", system-ui, "Segoe UI", "Helvetica Neue", Arial,
+    "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.font-display {
+  font-family: var(--font-display) !important;
+}
+
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
+.font-league {
+  font-family: "League Spartan", sans-serif;
+}
