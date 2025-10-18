@@ -342,20 +342,20 @@ const DaftarCalon: React.FC = () => {
                     }}
                   >
                     <div className="flex w-full items-center justify-center gap-3 md:justify-between md:gap-0">
-                  {DAPILS.map((dapil) => (
-                    <button
-                      key={dapil}
+                      {DAPILS.map((dapil) => (
+                        <button
+                          key={dapil}
                           ref={(el) => {
                             buttonRefs.current[dapil] = el;
                           }}
                           className={`cursor-pointer rounded-t-md px-4 py-3 text-sm whitespace-nowrap md:flex-1 md:text-center ${dapil === selectedDapil ? "font-semibold text-yellow-400" : "text-white"}`}
-                      onClick={() => setSelectedDapil(dapil)}
-                      aria-pressed={dapil === selectedDapil}
-                    >
-                      {dapil}
-                    </button>
-                  ))}
-                </div>
+                          onClick={() => setSelectedDapil(dapil)}
+                          aria-pressed={dapil === selectedDapil}
+                        >
+                          {dapil}
+                        </button>
+                      ))}
+                    </div>
 
                     <div className="absolute right-0 bottom-0 left-0 h-0.5 bg-slate-200" />
 
