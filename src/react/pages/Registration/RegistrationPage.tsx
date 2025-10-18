@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import RegistrationForm from "../../components/Registration/RegistrationForm";
 import AnimatedContent from "../../components/Common/AnimatedContent";
+import PopupSK from "../../components/Registration/PopupSK";
 
 const RegistrationPage: React.FC = () => {
+  const [showSK, setShowSK] = useState(false);
+
+  // show when opened /daftar
+  useEffect(() => {
+    setShowSK(true);
+  }, []);
+
   return (
     <main className="container mx-auto mt-8 bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center bg-no-repeat px-4 py-16 text-left">
       <AnimatedContent
@@ -23,6 +31,8 @@ const RegistrationPage: React.FC = () => {
       >
         <RegistrationForm />
       </AnimatedContent>
+
+      <PopupSK isOpen={showSK} onConfirm={() => setShowSK(false)} />
     </main>
   );
 };
