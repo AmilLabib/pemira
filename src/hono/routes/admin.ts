@@ -203,6 +203,186 @@ admin.delete(
   },
 );
 
+// update kandidat data (partial update)
+admin.put("/bakal_calon/:nim", async (c: Context<{ Bindings: Bindings }>) => {
+  const unauth = await requireAdmin(c as any);
+  if (unauth) return unauth;
+  try {
+    const nim = c.req.param("nim");
+
+    // ensure the row exists
+    const existing = await c.env.DB.prepare(
+      "SELECT * FROM bakal_calon WHERE nim = ?",
+    )
+      .bind(nim)
+      .first();
+    if (!existing) return c.json({ success: false, error: "Not found" }, 404);
+
+    const body = await c.req.json().catch(() => ({}));
+
+    // allowed updatable fields
+    const allowed = [
+      "posisi",
+      "nama",
+      "kelas",
+      "jurusan",
+      "dapil",
+      "visi",
+      "misi",
+      "program_kerja",
+      "ktm",
+      "surat_pernyataan",
+      "cv",
+      "formulir_pernyataan_dukungan",
+      "formulir_pendaftaran_tim_sukses",
+      "link_video",
+      "foto",
+      "ticket_number",
+    ];
+
+    const sets: string[] = [];
+    const binds: any[] = [];
+
+    for (const key of allowed) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        sets.push(`${key} = ?`);
+        binds.push((body as any)[key]);
+      }
+    }
+
+    if (sets.length === 0) {
+      return c.json({ success: false, error: "no fields to update" }, 400);
+    }
+
+    const sql = `UPDATE bakal_calon SET ${sets.join(", ")} WHERE nim = ?`;
+    binds.push(nim);
+
+    await c.env.DB.prepare(sql)
+      .bind(...binds)
+      .run();
+
+    const updated = await c.env.DB.prepare(
+      "SELECT * FROM bakal_calon WHERE nim = ?",
+    )
+      .bind(nim)
+      .first();
+
+    return c.json({ success: true, result: updated || null });
+  } catch (err: unknown) {
+    console.error("update candidate error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
+
+// upload files for existing candidate
+admin.post(
+  "/bakal_calon/:nim/upload",
+  async (c: Context<{ Bindings: Bindings }>) => {
+    const unauth = await requireAdmin(c as any);
+    if (unauth) return unauth;
+    try {
+      const nim = c.req.param("nim");
+
+      // fetch existing row
+      const existing = await c.env.DB.prepare(
+        "SELECT * FROM bakal_calon WHERE nim = ?",
+      )
+        .bind(nim)
+        .first();
+      if (!existing) return c.json({ success: false, error: "Not found" }, 404);
+
+      const form = await c.req.formData();
+
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+      const sanitize = (s: string) =>
+        s
+          .replace(/[/\\?%*:|"<>]+/g, "_")
+          .replace(/\s+/g, "_")
+          .replace(/_+/g, "_")
+          .replace(/^_+|_+$/g, "");
+
+      const now = new Date().toISOString().replace(/[:.]/g, "-");
+      const cleanPosisi = sanitize(String(existing.posisi || "unknown"));
+      const cleanNama = sanitize(String(existing.nama || "unknown"));
+      const cleanNim = sanitize(String(existing.nim || "unknown"));
+
+      const fileFields = [
+        "foto",
+        "ktm",
+        "surat_pernyataan",
+        "cv",
+        "formulir_pernyataan_dukungan",
+        "formulir_pendaftaran_tim_sukses",
+      ];
+
+      const updates: Record<string, string | null> = {};
+
+      for (const field of fileFields) {
+        const entry = form.get(field) as File | null;
+        if (!entry) continue;
+        if (entry.size > MAX_FILE_SIZE) {
+          return c.json(
+            { success: false, error: `${field} terlalu besar` },
+            400,
+          );
+        }
+
+        const extMatch = entry.name.match(/(\.[^\.]+)$/);
+        const ext = extMatch ? extMatch[1] : "";
+        const key = `registrations/${cleanPosisi}/${field}/${now}_${cleanNim}_${cleanNama}${ext}`;
+        const ab = await entry.arrayBuffer();
+
+        // upload new object
+        await c.env.BUCKET.put(key, ab, {
+          httpMetadata: {
+            contentType: entry.type || "application/octet-stream",
+          },
+        });
+
+        // attempt to delete old object if present
+        try {
+          const old = (existing as any)[field];
+          if (old) await c.env.BUCKET.delete(old);
+        } catch (err: unknown) {
+          console.error("failed to delete old r2 object", field, String(err));
+        }
+
+        updates[field] = key;
+      }
+
+      if (Object.keys(updates).length === 0) {
+        return c.json({ success: false, error: "no files uploaded" }, 400);
+      }
+
+      // build update SQL
+      const sets: string[] = [];
+      const binds: any[] = [];
+      for (const k of Object.keys(updates)) {
+        sets.push(`${k} = ?`);
+        binds.push(updates[k]);
+      }
+      binds.push(nim);
+
+      const sql = `UPDATE bakal_calon SET ${sets.join(", ")} WHERE nim = ?`;
+      await c.env.DB.prepare(sql)
+        .bind(...binds)
+        .run();
+
+      const updated = await c.env.DB.prepare(
+        "SELECT * FROM bakal_calon WHERE nim = ?",
+      )
+        .bind(nim)
+        .first();
+
+      return c.json({ success: true, result: updated || null });
+    } catch (err: unknown) {
+      console.error("upload files error", String(err));
+      return c.json({ success: false, error: String(err) }, { status: 500 });
+    }
+  },
+);
+
 // serve a file from R2 (proxy)
 admin.get("/file", async (c: Context<{ Bindings: Bindings }>) => {
   const unauth = await requireAdmin(c as any);

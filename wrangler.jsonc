@@ -34,6 +34,7 @@
     {
       "binding": "BUCKET",
       "bucket_name": "pemira",
+      "preview_bucket_name": "pemira-preview",
     },
   ],
   /**

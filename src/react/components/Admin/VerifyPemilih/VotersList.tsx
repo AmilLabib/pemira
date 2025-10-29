@@ -3,7 +3,6 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import type { FilterValues } from "./Filter";
 import PopupUpload from "./PopupUpload";
 import PopupReset from "./PopupReset";
-import * as XLSX from "xlsx";
 
 type Props = {
   filters?: FilterValues;
@@ -32,9 +31,17 @@ export default function VotersList({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const [voters, setVoters] = useState<any[]>(() =>
-    typeof sample !== "undefined" ? [...sample] : [],
-  );
+  const [voters, setVoters] = useState<any[]>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const raw = localStorage.getItem("voters");
+        if (raw) return JSON.parse(raw);
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+    return typeof sample !== "undefined" ? [...sample] : [];
+  });
 
   useEffect(() => {
     setPage(1);
@@ -52,44 +59,146 @@ export default function VotersList({
     onVotedCountChange?.(voted);
   }, [voters, onCountChange, onVotedCountChange]);
 
-  // Simple CSV parser
-  const parseCSV = useCallback((text: string) => {
-    const rows: string[] = [];
-    let cur = "";
-    let inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-      const ch = text[i];
-      if (ch === '"') {
-        if (inQuotes && text[i + 1] === '"') {
-          cur += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
+  const parseCSV = useCallback((text: string): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      if (typeof window === "undefined" || typeof Blob === "undefined") {
+        try {
+          const rows: string[] = [];
+          let cur = "";
+          let inQuotes = false;
+          for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (ch === '"') {
+              if (inQuotes && text[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else {
+                inQuotes = !inQuotes;
+              }
+              continue;
+            }
+            if (ch === "\n" && !inQuotes) {
+              rows.push(cur);
+              cur = "";
+              continue;
+            }
+            cur += ch;
+          }
+          if (cur) rows.push(cur);
+          const parsed = rows.map((r) =>
+            r
+              .split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+              .map((c) => c.replace(/^"|"$/g, "").trim()),
+          );
+          if (!parsed.length) return resolve([]);
+          const headers = parsed[0].map((h) =>
+            h.toLowerCase().replace(/\s+/g, "_"),
+          );
+          const data = parsed.slice(1).map((cols) => {
+            const obj: any = {};
+            headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
+            return obj;
+          });
+          return resolve(data);
+        } catch (err) {
+          return reject(err);
         }
-        continue;
       }
-      if (ch === "\n" && !inQuotes) {
-        rows.push(cur);
-        cur = "";
-        continue;
-      }
-      cur += ch;
-    }
-    if (cur) rows.push(cur);
 
-    const parsed = rows.map((r) =>
-      r
-        .split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
-        .map((c) => c.replace(/^"|"$/g, "").trim()),
-    );
-    if (!parsed.length) return [];
-    const headers = parsed[0].map((h) => h.toLowerCase().replace(/\s+/g, "_"));
-    const data = parsed.slice(1).map((cols) => {
-      const obj: any = {};
-      headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
-      return obj;
+      const workerCode = `
+      self.onmessage = function(e) {
+        try {
+          const text = e.data;
+          const rows = [];
+          let cur = "";
+          let inQuotes = false;
+          for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (ch === '"') {
+              if (inQuotes && text[i + 1] === '"') { cur += '"'; i++; } else { inQuotes = !inQuotes; }
+              continue;
+            }
+            if (ch === "\n" && !inQuotes) { rows.push(cur); cur = ""; continue; }
+            cur += ch;
+          }
+          if (cur) rows.push(cur);
+          const parsed = rows.map(function(r) {
+            return r.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(function(c){ return c.replace(/^\"|\"$/g, '').trim(); });
+          });
+          if (!parsed.length) { self.postMessage({ok:true, data: []}); return; }
+          const headers = parsed[0].map(function(h){ return h.toLowerCase().replace(/\s+/g,'_'); });
+          const data = parsed.slice(1).map(function(cols){ var obj={}; headers.forEach(function(h,i){ obj[h]=cols[i]||''; }); return obj; });
+          self.postMessage({ok:true, data: data});
+        } catch (err) { self.postMessage({ok:false, error: String(err)}); }
+      }`;
+
+      try {
+        const blob = new Blob([workerCode], { type: "text/javascript" });
+        const url = URL.createObjectURL(blob);
+        const w = new Worker(url);
+        const cleanup = () => {
+          w.terminate();
+          URL.revokeObjectURL(url);
+        };
+        w.onmessage = function (ev) {
+          const d = ev.data;
+          cleanup();
+          if (d && d.ok) resolve(d.data || []);
+          else
+            reject(
+              d && d.error ? new Error(d.error) : new Error("Parse error"),
+            );
+        };
+        w.onerror = function (err) {
+          cleanup();
+          reject(err instanceof Error ? err : new Error(String(err)));
+        };
+        w.postMessage(text);
+      } catch (err) {
+        // fallback
+        try {
+          const rows: string[] = [];
+          let cur = "";
+          let inQuotes = false;
+          for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (ch === '"') {
+              if (inQuotes && text[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else {
+                inQuotes = !inQuotes;
+              }
+              continue;
+            }
+            if (ch === "\n" && !inQuotes) {
+              rows.push(cur);
+              cur = "";
+              continue;
+            }
+            cur += ch;
+          }
+          if (cur) rows.push(cur);
+          const parsed = rows.map((r) =>
+            r
+              .split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+              .map((c) => c.replace(/^"|"$/g, "").trim()),
+          );
+          if (!parsed.length) return resolve([]);
+          const headers = parsed[0].map((h) =>
+            h.toLowerCase().replace(/\s+/g, "_"),
+          );
+          const data = parsed.slice(1).map((cols) => {
+            const obj: any = {};
+            headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
+            return obj;
+          });
+          return resolve(data);
+        } catch (err2) {
+          return reject(err2);
+        }
+      }
     });
-    return data;
   }, []);
 
   const normalizeRow = useCallback((row: any, _idx: number, baseId: number) => {
@@ -123,36 +232,49 @@ export default function VotersList({
   }, []);
 
   // handle uploaded CSV file
-  function handleUpload(file: File) {
+  async function handleUpload(file: File) {
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const text = String(reader.result ?? "");
-      const parsed = parseCSV(text);
-      if (!parsed.length) {
-        setShowUpload(false);
-        return;
-      }
-      const baseId = Date.now();
-      const newRecords = parsed.map((r, i) => normalizeRow(r, i, baseId));
+      try {
+        const parsed = await parseCSV(text);
+        if (!parsed.length) {
+          setShowUpload(false);
+          return;
+        }
+        const baseId = Date.now();
+        const newRecords = parsed.map((r, i) => normalizeRow(r, i, baseId));
 
-      setVoters((prev) => {
-        const existingNims = new Set(
-          prev.map((v) =>
-            String(v.nim ?? "")
-              .trim()
-              .toLowerCase(),
-          ),
-        );
-        const filteredNew = newRecords.filter((rec) => {
-          const nim = String(rec.nim ?? "").trim();
-          if (!nim) return true;
-          return !existingNims.has(nim.toLowerCase());
+        setVoters((prev) => {
+          const existingNims = new Set(
+            prev.map((v) =>
+              String(v.nim ?? "")
+                .trim()
+                .toLowerCase(),
+            ),
+          );
+          const filteredNew = newRecords.filter((rec) => {
+            const nim = String(rec.nim ?? "").trim();
+            if (!nim) return true;
+            return !existingNims.has(nim.toLowerCase());
+          });
+          const next = [...prev, ...filteredNew];
+          try {
+            if (typeof window !== "undefined") {
+              localStorage.setItem("voters", JSON.stringify(next));
+            }
+          } catch (e) {
+            // ignore storage errors
+          }
+          return next;
         });
-        return [...prev, ...filteredNew];
-      });
 
-      setPage(1);
-      setShowUpload(false);
+        setPage(1);
+        setShowUpload(false);
+      } catch (err) {
+        console.error("CSV parse failed", err);
+        setShowUpload(false);
+      }
     };
     reader.onerror = () => {
       setShowUpload(false);
@@ -161,32 +283,36 @@ export default function VotersList({
   }
 
   // handle export to Excel
-  function exportToExcel() {
+  async function exportToExcel() {
     if (!voters || !voters.length) {
       console.log("No voters to export");
       return;
     }
 
-    // map voters to a clean sheet-friendly shape
-    const rows = voters.map((v) => ({
-      id: v.id ?? "",
-      name: v.name ?? "",
-      nim: v.nim ?? "",
-      token: v.token ?? "",
-      jurusan: v.jurusan ?? "",
-      dapil: v.dapil ?? "",
-      kelas: v.kelas ?? "",
-      angkatan: v.angkatan ?? "",
-      gender: v.gender ?? "",
-      absentNumber: v.absentNumber ?? "",
-      status: v.status ?? "",
-    }));
+    try {
+      const XLSX = await import(/* webpackChunkName: "xlsx" */ "xlsx");
+      const rows = voters.map((v) => ({
+        id: v.id ?? "",
+        name: v.name ?? "",
+        nim: v.nim ?? "",
+        token: v.token ?? "",
+        jurusan: v.jurusan ?? "",
+        dapil: v.dapil ?? "",
+        kelas: v.kelas ?? "",
+        angkatan: v.angkatan ?? "",
+        gender: v.gender ?? "",
+        absentNumber: v.absentNumber ?? "",
+        status: v.status ?? "",
+      }));
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Voters");
-    const filename = `voters-${new Date().toISOString().slice(0, 10)}.xlsx`;
-    XLSX.writeFile(wb, filename);
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Voters");
+      const filename = `voters-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, filename);
+    } catch (err) {
+      console.error("Failed to export xlsx", err);
+    }
   }
 
   const filtered = useMemo(() => {
@@ -480,6 +606,12 @@ export default function VotersList({
         onConfirm={() => {
           console.log("Resetting all voter data");
           setVoters([]);
+          try {
+            if (typeof window !== "undefined")
+              localStorage.removeItem("voters");
+          } catch (e) {
+            // ignore
+          }
           setPage(1);
           setShowReset(false);
         }}

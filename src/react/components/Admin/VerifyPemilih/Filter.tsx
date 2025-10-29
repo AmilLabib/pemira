@@ -2,23 +2,32 @@ import { useState, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
 
 export type FilterValues = {
-  class: string;
-  jurusan: string;
-  status: string;
+  class?: string;
+  jurusan?: string;
+  status?: string;
   search: string;
+  position?: string;
 };
 
 type Props = {
   value?: FilterValues;
   onApply?: (filters: FilterValues) => void;
+  showStatus?: boolean;
+  showPosition?: boolean;
 };
 
-export default function FilterBar({ value, onApply }: Props) {
+export default function FilterBar({
+  value,
+  onApply,
+  showStatus = true,
+  showPosition = false,
+}: Props) {
   const [filters, setFilters] = useState<FilterValues>(
     value ?? {
       class: "All Kelas",
       jurusan: "All Jurusan",
       status: "All Status",
+      position: "All Positions",
       search: "",
     },
   );
@@ -73,67 +82,90 @@ export default function FilterBar({ value, onApply }: Props) {
           </div>
         </div>
         {/* Class */}
-        <div className="flex flex-col">
-          <label className="mb-1 text-sm font-medium text-gray-700">
-            Kelas
-          </label>
-          <select
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            value={filters.class}
-            onChange={(e) => handleChange("class", e.target.value)}
-          >
-            <option>All Kelas</option>
-            <option>Kelas A</option>
-            <option>Kelas B</option>
-          </select>
-        </div>
+        {showPosition ? (
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">
+              Position
+            </label>
+            <select
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              value={filters.position}
+              onChange={(e) => handleChange("position", e.target.value)}
+            >
+              <option>All Positions</option>
+              <option>Presma</option>
+              <option>Wapresma</option>
+              <option>BLM</option>
+            </select>
+          </div>
+        ) : (
+          <>
+            {/* Class */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">
+                Kelas
+              </label>
+              <select
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                value={filters.class}
+                onChange={(e) => handleChange("class", e.target.value)}
+              >
+                <option>All Kelas</option>
+                <option>Kelas A</option>
+                <option>Kelas B</option>
+              </select>
+            </div>
 
-        {/* Jurusan */}
-        <div className="flex flex-col">
-          <label className="mb-1 text-sm font-medium text-gray-700">
-            Jurusan
-          </label>
-          <select
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            value={filters.jurusan}
-            onChange={(e) => handleChange("jurusan", e.target.value)}
-          >
-            <option>All Jurusan</option>
-            <option>D3 Akuntansi Alih Program</option>
-            <option>D3 Kebendaharaan Negara Alih Program</option>
-            <option>D3 Kepabeanan dan Cukai Alih Program</option>
-            <option>D3 Manajemen Aset Alih Program</option>
-            <option>D3 Pajak Alih Program</option>
-            <option>D3 PBB/Penilai Alih Program</option>
-            <option>D4 Akuntansi Sektor Publik Alih Program</option>
-            <option>D4 Akuntansi Sektor Publik Reguler</option>
-            <option>D4 Manajemen Aset Publik Alih Program</option>
-            <option>D4 Manajemen Aset Publik Reguler</option>
-            <option>D4 Manajemen Keuangan Negara Alih Program</option>
-            <option>D4 Manajemen Keuangan Negara Reguler</option>
-          </select>
-        </div>
+            {/* Jurusan */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">
+                Jurusan
+              </label>
+              <select
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                value={filters.jurusan}
+                onChange={(e) => handleChange("jurusan", e.target.value)}
+              >
+                <option>All Jurusan</option>
+                <option>D3 Akuntansi Alih Program</option>
+                <option>D3 Kebendaharaan Negara Alih Program</option>
+                <option>D3 Kepabeanan dan Cukai Alih Program</option>
+                <option>D3 Manajemen Aset Alih Program</option>
+                <option>D3 Pajak Alih Program</option>
+                <option>D3 PBB/Penilai Alih Program</option>
+                <option>D4 Akuntansi Sektor Publik Alih Program</option>
+                <option>D4 Akuntansi Sektor Publik Reguler</option>
+                <option>D4 Manajemen Aset Publik Alih Program</option>
+                <option>D4 Manajemen Aset Publik Reguler</option>
+                <option>D4 Manajemen Keuangan Negara Alih Program</option>
+                <option>D4 Manajemen Keuangan Negara Reguler</option>
+              </select>
+            </div>
+          </>
+        )}
 
         {/* Voting Status */}
-        <div className="flex flex-col">
-          <label className="mb-1 text-sm font-medium text-gray-700">
-            Status Voting
-          </label>
-          <select
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            value={filters.status}
-            onChange={(e) => handleChange("status", e.target.value)}
-          >
-            <option>All Status</option>
-            <option>Voted</option>
-            <option>Not Voted</option>
-          </select>
-        </div>
+        {showStatus ? (
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">
+              Status Voting
+            </label>
+            <select
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              value={filters.status}
+              onChange={(e) => handleChange("status", e.target.value)}
+            >
+              <option>All Status</option>
+              <option>Voted</option>
+              <option>Not Voted</option>
+            </select>
+          </div>
+        ) : null}
 
         {/* Apply Button */}
         <button
           type="submit"
-          className="flex items-center gap-2 self-end rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+          className="mx-auto mt-6 flex items-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
           style={{ cursor: "pointer" }}
         >
           <Filter size={16} />

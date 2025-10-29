@@ -10,7 +10,6 @@ const AdminLayout: React.FC = () => {
   const navItems = [
     { to: "/admin", label: "Verifikasi Pemilih" },
     { to: "/admin/verifikasi", label: "Verifikasi Bakal Calon" },
-    { to: "/admin/assign-number", label: "Assign Number" },
   ];
 
   return (
