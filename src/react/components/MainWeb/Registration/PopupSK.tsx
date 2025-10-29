@@ -155,7 +155,7 @@ export default function PopupSK({ isOpen, onConfirm }: Props) {
                     )}
                   </button>
 
-                  <div className="text-center text-sm font-medium text-slate-800">
+                  <div className="text-left text-sm font-medium text-slate-800">
                     <span className="font-bold">Saya telah membaca</span> dan{" "}
                     <span className="font-bold">siap memenuhi</span> seluruh
                     persyaratan yang berlaku

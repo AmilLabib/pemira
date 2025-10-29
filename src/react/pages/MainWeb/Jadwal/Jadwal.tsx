@@ -4,7 +4,7 @@ import jadwals from "../../../data/jadwals";
 
 const Jadwal: React.FC = () => {
   return (
-    <div className="mx-auto mt-12 h-full min-h-screen items-center justify-center bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat px-4 py-16">
+    <div className="mx-auto mt-12 h-full items-center justify-center bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat px-4 py-16">
       <div className="rounded-t-xl bg-[#143b8a] px-6 pt-4 pb-2">
         <h2 className="text-2xl font-bold text-white">Data Jadwal Per Kelas</h2>
         <p className="mt-1 text-xs text-white">

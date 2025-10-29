@@ -4,10 +4,10 @@ import Card from "../../../components/WebVote/Landing/LoginCard";
 function Landing() {
   return (
     <div
-      className="min-h-screen w-full bg-cover bg-center bg-no-repeat"
+      className="h-screen w-full overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${bg1})` }}
     >
-      <div className="container mx-auto mt-8 flex min-h-screen flex-col items-center px-8 py-12 lg:mt-0 lg:flex-row lg:gap-12">
+      <div className="container mx-auto mt-16 flex min-h-screen flex-col items-center px-8 py-12 lg:mt-0 lg:flex-row lg:gap-12">
         {/* Left: large heading */}
         <div className="mb-8 flex items-center justify-center text-center lg:mb-4 lg:flex-1 lg:text-left">
           <div className="flex flex-col">

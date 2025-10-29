@@ -43,7 +43,7 @@ const Hero: React.FC = () => {
         ))}
 
         {/* overlay text */}
-        <div className="absolute bottom-20 left-10 z-20 max-w-3xl lg:bottom-40 lg:left-40">
+        <div className="absolute bottom-30 left-10 z-20 max-w-3xl lg:bottom-40 lg:left-40">
           <div>
             {/* Suara Berkarya */}
             <BlurText

@@ -4,9 +4,9 @@ import Carousel, {
 } from "../../../components/MainWeb/Home/Carousel";
 import Hero from "../../../components/MainWeb/Home/Hero";
 import Tugas from "../../../components/MainWeb/Home/Tugas";
-import Hasil from "../../../components/MainWeb/Home/Hasil";
+// import Hasil from "../../../components/MainWeb/Home/Hasil";
 import AnimatedContent from "../../../components/MainWeb/Common/AnimatedContent";
-import PresmaColumnChart from "../../../components/MainWeb/Home/PresmaColumnChart";
+// import PresmaColumnChart from "../../../components/MainWeb/Home/PresmaColumnChart";
 
 const carouselSlides: Slide[] = [
   { type: "youtube", videoId: "dQw4w9WgXcQ", title: "Promo Video" },
@@ -30,7 +30,7 @@ const carouselSlides: Slide[] = [
 
 const HomePage: React.FC = () => {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative w-full overflow-hidden">
       <Hero />
       <div className="w-full bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat">
         <AnimatedContent
@@ -54,7 +54,7 @@ const HomePage: React.FC = () => {
         </AnimatedContent>
 
         <div className="container mx-auto">
-          <AnimatedContent
+          {/* <AnimatedContent
             distance={150}
             direction="vertical"
             duration={1}
@@ -69,7 +69,7 @@ const HomePage: React.FC = () => {
             delay={0.3}
           >
             <PresmaColumnChart />
-          </AnimatedContent>
+          </AnimatedContent> */}
 
           <AnimatedContent
             distance={150}

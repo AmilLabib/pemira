@@ -1,0 +1,14 @@
+# SPA fallback for client-side routing (React/Vite)
+# Allow direct file requests to be served normally, otherwise route to index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Don't rewrite for existing files or directories
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Rewrite everything else to index.html
+  RewriteRule ^ /index.html [L]
+</IfModule>

@@ -298,7 +298,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           <select
             value={posisi}
             onChange={(e) => setPosisi(e.target.value as PositionType)}
-            className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-sm text-white focus:outline-none lg:text-lg"
+            className="mt-2 w-full rounded-full bg-[#21325f] px-5 py-3 text-sm text-white focus:outline-none lg:text-lg"
           >
             <option value="">-- Pilih Posisi --</option>
             {positions.map((p) => (
@@ -325,7 +325,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
                 return next;
               });
             }}
-            className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            className="mt-2 w-full rounded-full bg-[#21325f] px-5 py-3 text-white focus:outline-none"
           />
           {errors.nama && (
             <div className="text-sm text-red-600">{errors.nama}</div>
@@ -348,7 +348,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
                   return next;
                 });
               }}
-              className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+              className="mt-2 w-full rounded-full bg-[#21325f] px-5 py-3 text-white focus:outline-none"
             />
             {errors.nim && (
               <div className="text-sm text-red-600">{errors.nim}</div>
@@ -359,7 +359,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
             <input
               value={kelas}
               onChange={(e) => setKelas(e.target.value)}
-              className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+              className="mt-2 w-full rounded-full bg-[#21325f] px-5 py-3 text-white focus:outline-none"
             />
             {errors.kelas && (
               <div className="text-sm text-red-600">{errors.kelas}</div>
@@ -370,7 +370,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
             <select
               value={jurusan}
               onChange={(e) => setJurusan(e.target.value)}
-              className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-sm text-white focus:outline-none lg:text-lg"
+              className="mt-2 w-full rounded-full bg-[#21325f] px-5 py-3 text-sm text-white focus:outline-none lg:text-lg"
             >
               <option value="">-- Pilih Jurusan --</option>
               {jurusans.map((j) => (
@@ -392,7 +392,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
             <input
               value={dapil}
               readOnly
-              className="mt-2 w-full rounded-lg bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+              className="mt-2 w-full rounded-lg bg-[#21325f] px-5 py-3 text-white focus:outline-none"
             />
             {errors.dapil && (
               <div className="text-sm text-red-600">{errors.dapil}</div>
@@ -405,7 +405,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           <textarea
             value={visi}
             onChange={(e) => setVisi(e.target.value)}
-            className="mt-2 min-h-[80px] w-full rounded-lg bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            className="mt-2 min-h-[150px] w-full rounded-lg bg-[#21325f] px-5 py-3 text-white focus:outline-none"
           />
           {errors.visi && (
             <div className="text-sm text-red-600">{errors.visi}</div>
@@ -417,7 +417,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           <textarea
             value={misi}
             onChange={(e) => setMisi(e.target.value)}
-            className="mt-2 min-h-[80px] w-full rounded-lg bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            className="mt-2 min-h-[150px] w-full rounded-lg bg-[#21325f] px-5 py-3 text-white focus:outline-none"
           />
           {errors.misi && (
             <div className="text-sm text-red-600">{errors.misi}</div>
@@ -431,7 +431,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           <textarea
             value={programKerja}
             onChange={(e) => setProgramKerja(e.target.value)}
-            className="mt-1 w-full rounded border bg-[#0b2b5a] px-3 py-2 text-white focus:outline-none"
+            className="mt-1 min-h-[150px] w-full rounded border bg-[#21325f] px-3 py-2 text-white focus:outline-none"
           />
           {errors.programKerja && (
             <div className="text-sm text-red-600">{errors.programKerja}</div>
@@ -558,7 +558,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
           <input
             value={linkVideo}
             onChange={(e) => setLinkVideo(e.target.value)}
-            className="mt-2 w-full rounded-full bg-[#0b2b5a] px-5 py-3 text-white focus:outline-none"
+            className="mt-2 w-full rounded-full bg-[#21325f] px-5 py-3 text-white focus:outline-none"
             placeholder="https://youtube.com/..."
           />
         </div>

@@ -53,10 +53,10 @@ const Card: React.FC<CardProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="mx-auto h-[62vh] max-w-lg">
+    <div className="mx-auto h-[62vh] max-h-1/3 max-w-lg">
       <form
         onSubmit={handleSubmit}
-        className="mr-8 flex h-full flex-col rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-lg md:p-8"
+        className="mr-8 flex h-full max-h-[500px] flex-col rounded-2xl border border-gray-200 bg-white/95 p-6 shadow-lg md:p-8"
         aria-label="Login PEMIRA"
       >
         <h2 className="font-league mb-6 text-center text-xl font-extrabold text-[#002a45] lg:text-3xl">
