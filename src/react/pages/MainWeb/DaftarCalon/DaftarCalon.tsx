@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import Ribbon from "../../components/DaftarCalon/Ribbon";
+import Ribbon from "../../../components/MainWeb/DaftarCalon/Ribbon";
 
 type Candidate = {
   posisi: string;
@@ -147,7 +147,8 @@ const DaftarCalon: React.FC = () => {
 
   // fixed dapil navigation (always show these 4)
   const DAPILS = ["Dapil I", "Dapil II", "Dapil III", "Dapil IV"];
-  const [selectedDapil, setSelectedDapil] = useState<string>(DAPILS[0]);
+  // start with no dapil selected so we show an instruction until the user clicks
+  const [selectedDapil, setSelectedDapil] = useState<string>("");
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [indicatorStyle, setIndicatorStyle] = useState<{
@@ -161,6 +162,11 @@ const DaftarCalon: React.FC = () => {
     let attempts = 0;
 
     const tryPosition = () => {
+      // if no dapil selected, don't position the indicator
+      if (!selectedDapil) {
+        setIndicatorStyle({ left: 0, width: 0 });
+        return;
+      }
       attempts += 1;
       const tabEl = buttonRefs.current[selectedDapil];
       const container = tabsRef.current;
@@ -192,7 +198,7 @@ const DaftarCalon: React.FC = () => {
   }, [selectedDapil]);
 
   return (
-    <div className="container mx-auto mt-12 max-w-full overflow-hidden bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center px-4 py-8">
+    <div className="container mx-auto mt-12 max-w-full overflow-hidden bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top px-4 py-8">
       <div className="mt-8">
         <Ribbon>CALON PRESMA DAN WAPRESMA</Ribbon>
       </div>
@@ -204,11 +210,11 @@ const DaftarCalon: React.FC = () => {
             {pairs.length === 0 ? (
               <div>Tidak ada pasangan terverifikasi dengan nomor.</div>
             ) : (
-              <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 md:grid-cols-3 lg:gap-6">
+              <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
                 {pairs.map((p) => (
                   <div
                     key={p.number}
-                    className="relative mt-8 rounded-xl bg-white p-4 shadow-lg transition hover:shadow-md"
+                    className="relative mt-8 rounded-xl bg-white pb-12 shadow-lg transition hover:shadow-md sm:p-4 md:p-1 lg:p-4"
                   >
                     <div className="font-league absolute top-3 left-3 rounded-xl bg-[#102a71] px-2 py-0.5 text-lg font-bold text-white shadow">
                       No {p.number}
@@ -225,43 +231,47 @@ const DaftarCalon: React.FC = () => {
                               key={c.nim}
                               className="flex flex-col items-center gap-3 text-center"
                             >
-                              {imageLoading[c.nim] ? (
-                                <div className="mt-8 h-48 w-36 animate-pulse rounded-md bg-gray-200 lg:h-60 lg:w-45" />
-                              ) : imageUrls[c.nim] ? (
-                                <img
-                                  src={imageUrls[c.nim]}
-                                  alt={c.nama}
-                                  className="mx-auto mt-8 h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
-                                  style={{ objectPosition: "center center" }}
-                                />
-                              ) : c.foto && imageError[c.nim] ? (
-                                <div className="flex h-48 w-36 items-center justify-center rounded-md bg-red-100 text-xs text-red-600 lg:h-60 lg:w-45">
-                                  Err
-                                </div>
-                              ) : c.foto ? (
-                                <img
-                                  src={c.foto}
-                                  alt={c.nama}
-                                  className="mx-auto mt-8 h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
-                                  style={{ objectPosition: "center center" }}
-                                />
-                              ) : (
-                                <div className="h-60 w-45 rounded-md bg-gray-200" />
-                              )}
+                              <div className="relative">
+                                {imageLoading[c.nim] ? (
+                                  <div className="mt-8 h-48 w-36 animate-pulse rounded-md bg-gray-200 md:h-28 md:w-21 lg:h-60 lg:w-45" />
+                                ) : imageUrls[c.nim] ? (
+                                  <img
+                                    src={imageUrls[c.nim]}
+                                    alt={c.nama}
+                                    className="mx-auto mt-8 h-48 w-36 rounded-md object-cover md:h-28 md:w-21 lg:h-60 lg:w-45"
+                                    style={{ objectPosition: "center center" }}
+                                  />
+                                ) : c.foto && imageError[c.nim] ? (
+                                  <div className="flex h-48 w-36 items-center justify-center rounded-md bg-red-100 text-xs text-red-600 md:h-28 md:w-21 lg:h-60 lg:w-45">
+                                    Err
+                                  </div>
+                                ) : c.foto ? (
+                                  <img
+                                    src={c.foto}
+                                    alt={c.nama}
+                                    className="mx-auto mt-8 h-48 w-36 rounded-md object-cover md:h-28 md:w-21 lg:h-60 lg:w-45"
+                                    style={{ objectPosition: "center center" }}
+                                  />
+                                ) : (
+                                  <div className="h-48 w-36 rounded-md bg-gray-200 md:h-28 md:w-21 lg:h-60 lg:w-45" />
+                                )}
 
-                              <div className="mt-2 flex w-full flex-col items-center">
-                                <div className="font-medium">{c.nama}</div>
-                                <div className="text-sm text-gray-600">
-                                  {c.jurusan}
+                                {/* Position badge (bottom center) */}
+                                <div className="absolute left-1/2 mt-2 -translate-x-1/2 transform rounded bg-yellow-400 px-2 py-0.5 text-xs font-bold text-[#002a45]">
+                                  {c.posisi === "presma"
+                                    ? "Presma"
+                                    : c.posisi === "wapresma"
+                                      ? "Wapresma"
+                                      : c.posisi}
                                 </div>
-                                <div className="mt-2">
-                                  <button
-                                    className="rounded bg-slate-100 px-3 py-1 text-sm hover:bg-slate-300"
-                                    onClick={() => setSelected(c)}
-                                    style={{ cursor: "pointer" }}
-                                  >
-                                    Details
-                                  </button>
+                              </div>
+
+                              <div className="mt-4 flex w-full flex-col items-center sm:mb-8 md:mb-12 lg:mb-8">
+                                <div className="text-base font-medium md:text-xs lg:text-base">
+                                  {c.nama}
+                                </div>
+                                <div className="text-sm text-gray-600 md:text-[8px] lg:text-sm">
+                                  {c.jurusan}
                                 </div>
                               </div>
                             </div>
@@ -277,47 +287,88 @@ const DaftarCalon: React.FC = () => {
                               key={c.nim}
                               className="flex flex-col items-center gap-3 text-center"
                             >
-                              {imageLoading[c.nim] ? (
-                                <div className="mt-8 h-48 w-36 animate-pulse rounded-md bg-gray-200 lg:h-60 lg:w-45" />
-                              ) : imageUrls[c.nim] ? (
-                                <img
-                                  src={imageUrls[c.nim]}
-                                  alt={c.nama}
-                                  className="mx-auto h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
-                                  style={{ objectPosition: "center center" }}
-                                />
-                              ) : c.foto && imageError[c.nim] ? (
-                                <div className="flex h-48 w-36 items-center justify-center rounded-md bg-red-100 text-xs text-red-600 lg:h-60 lg:w-45">
-                                  Err
-                                </div>
-                              ) : c.foto ? (
-                                <img
-                                  src={c.foto}
-                                  alt={c.nama}
-                                  className="mx-auto h-48 w-36 rounded-md object-cover lg:h-60 lg:w-45"
-                                  style={{ objectPosition: "center center" }}
-                                />
-                              ) : (
-                                <div className="h-48 w-36 rounded-md bg-gray-200 lg:h-60 lg:w-45" />
-                              )}
+                              <div className="relative">
+                                {imageLoading[c.nim] ? (
+                                  <div className="mt-8 h-48 w-36 animate-pulse rounded-md bg-gray-200 md:h-28 md:w-21 lg:h-60 lg:w-45" />
+                                ) : imageUrls[c.nim] ? (
+                                  <img
+                                    src={imageUrls[c.nim]}
+                                    alt={c.nama}
+                                    className="mx-auto mt-8 h-48 w-36 rounded-md object-cover md:h-28 md:w-21 lg:h-60 lg:w-45"
+                                    style={{ objectPosition: "center center" }}
+                                  />
+                                ) : c.foto && imageError[c.nim] ? (
+                                  <div className="mt-8 flex h-48 w-36 items-center justify-center rounded-md bg-red-100 text-xs text-red-600 md:h-28 md:w-21 lg:h-60 lg:w-45">
+                                    Err
+                                  </div>
+                                ) : c.foto ? (
+                                  <img
+                                    src={c.foto}
+                                    alt={c.nama}
+                                    className="mx-auto h-48 w-36 rounded-md object-cover md:h-28 md:w-21 lg:h-60 lg:w-45"
+                                    style={{ objectPosition: "center center" }}
+                                  />
+                                ) : (
+                                  <div className="h-48 w-36 rounded-md bg-gray-200 md:h-28 md:w-21 lg:h-60 lg:w-45" />
+                                )}
 
-                              <div className="mt-2 flex w-full flex-col items-center">
-                                <div className="font-medium">{c.nama}</div>
-                                <div className="text-sm text-gray-600">
-                                  {c.jurusan}
+                                {/* Position badge (bottom center) */}
+                                <div className="absolute left-1/2 mt-2 -translate-x-1/2 transform rounded bg-yellow-400 px-2 py-0.5 text-xs font-bold text-[#002a45]">
+                                  {c.posisi === "presma"
+                                    ? "Presma"
+                                    : c.posisi === "wapresma"
+                                      ? "Wapresma"
+                                      : c.posisi}
                                 </div>
-                                <div className="mt-2">
-                                  <button
-                                    className="rounded bg-slate-100 px-3 py-1 text-sm hover:bg-slate-300"
-                                    onClick={() => setSelected(c)}
-                                    style={{ cursor: "pointer" }}
-                                  >
-                                    Details
-                                  </button>
+                              </div>
+
+                              <div className="mt-4 flex w-full flex-col items-center">
+                                <div className="text-base font-medium md:text-xs lg:text-base">
+                                  {c.nama}
+                                </div>
+                                <div className="text-sm text-gray-600 md:text-[8px] lg:text-sm">
+                                  {c.jurusan}
                                 </div>
                               </div>
                             </div>
                           ))}
+                      </div>
+                    </div>
+
+                    {/* Bottom fixed buttons aligned horizontally and centered vertically with each other */}
+                    <div className="absolute right-0 bottom-3 left-0 flex items-center justify-between">
+                      <div className="flex flex-1 justify-center">
+                        {p.pair.find((c) => c.posisi === "presma") ? (
+                          <button
+                            className="rounded bg-slate-100 px-3 py-1 text-sm hover:bg-slate-300"
+                            onClick={() =>
+                              setSelected(
+                                p.pair.find((c) => c.posisi === "presma") ||
+                                  null,
+                              )
+                            }
+                            style={{ cursor: "pointer" }}
+                          >
+                            Details
+                          </button>
+                        ) : null}
+                      </div>
+
+                      <div className="flex flex-1 justify-center">
+                        {p.pair.find((c) => c.posisi === "wapresma") ? (
+                          <button
+                            className="rounded bg-slate-100 px-3 py-1 text-sm hover:bg-slate-300"
+                            onClick={() =>
+                              setSelected(
+                                p.pair.find((c) => c.posisi === "wapresma") ||
+                                  null,
+                              )
+                            }
+                            style={{ cursor: "pointer" }}
+                          >
+                            Details
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -371,47 +422,64 @@ const DaftarCalon: React.FC = () => {
 
                 {/* show only selected dapil */}
                 {(() => {
+                  if (!selectedDapil) {
+                    return (
+                      <div className="text-poppins rounded-xl bg-white p-6 text-center font-bold text-[#102a71]">
+                        Pilih salah satu dari Dapil...
+                      </div>
+                    );
+                  }
                   const found = anggotaByDapil.find(
                     ([d]) => d === selectedDapil,
                   );
                   if (!found) return null; // no candidates for this dapil -> show nothing
                   const [dapil, list] = found;
                   return (
-                    // show only the dapil card (no outer border wrapper)
                     <div key={dapil}>
                       <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {list.map((c) => (
                           <div
                             key={c.nim}
-                            className="flex flex-col items-start gap-3 rounded bg-white p-3 shadow-xl"
+                            className="relative flex flex-col items-start gap-3 rounded bg-white p-3 shadow-xl"
                           >
-                            <div className="flex w-full items-center gap-3">
-                              {imageLoading[c.nim] ? (
-                                <div className="h-28 w-21 animate-pulse rounded-md bg-gray-200" />
-                              ) : imageUrls[c.nim] ? (
-                                <img
-                                  src={imageUrls[c.nim]}
-                                  alt={c.nama}
-                                  className="h-28 w-21 rounded-md object-cover"
-                                  style={{ objectPosition: "center center" }}
-                                />
-                              ) : c.foto && imageError[c.nim] ? (
-                                <div className="flex h-20 w-14 items-center justify-center rounded-md bg-red-100 text-xs text-red-600">
-                                  Err
+                            {c.ticket_number !== null &&
+                              c.ticket_number !== undefined && (
+                                <div className="absolute top-2 right-2 z-20 rounded-full bg-[#102a71] px-4 py-1 text-sm font-bold text-white shadow">
+                                  {c.ticket_number}
                                 </div>
-                              ) : c.foto ? (
-                                <img
-                                  src={c.foto}
-                                  alt={c.nama}
-                                  className="h-28 w-21 rounded-md object-cover"
-                                  style={{ objectPosition: "center center" }}
-                                />
-                              ) : (
-                                <div className="h-28 w-21 rounded-md bg-gray-200" />
                               )}
+                            <div className="flex w-full items-center gap-3">
+                              <div className="relative">
+                                {imageLoading[c.nim] ? (
+                                  <div className="h-28 w-21 animate-pulse rounded-md bg-gray-200" />
+                                ) : imageUrls[c.nim] ? (
+                                  <img
+                                    src={imageUrls[c.nim]}
+                                    alt={c.nama}
+                                    className="h-28 w-21 rounded-md object-cover"
+                                    style={{ objectPosition: "center center" }}
+                                  />
+                                ) : c.foto && imageError[c.nim] ? (
+                                  <div className="flex h-20 w-14 items-center justify-center rounded-md bg-red-100 text-xs text-red-600">
+                                    Err
+                                  </div>
+                                ) : c.foto ? (
+                                  <img
+                                    src={c.foto}
+                                    alt={c.nama}
+                                    className="h-28 w-21 rounded-md object-cover"
+                                    style={{ objectPosition: "center center" }}
+                                  />
+                                ) : (
+                                  <div className="h-28 w-21 rounded-md bg-gray-200" />
+                                )}
+
+                                {/* ticket badge moved to top-right of the card container */}
+                              </div>
 
                               <div className="flex-1">
                                 <div className="font-medium">{c.nama}</div>
+                                <div className="text-sm">{c.jurusan}</div>
                                 <div className="text-sm text-gray-600">
                                   {c.kelas ?? "-"}
                                 </div>
@@ -422,6 +490,7 @@ const DaftarCalon: React.FC = () => {
                               <button
                                 className="rounded bg-slate-100 px-2 py-1 text-sm"
                                 onClick={() => setSelected(c)}
+                                style={{ cursor: "pointer" }}
                               >
                                 Details
                               </button>
@@ -442,10 +511,10 @@ const DaftarCalon: React.FC = () => {
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
             onClick={() => setSelected(null)}
           />
-          <div className="relative z-10 max-w-xl rounded bg-white p-6 shadow-lg">
+          <div className="relative z-10 h-[80vh] w-[80vw] overflow-y-scroll rounded bg-white p-6 shadow-lg">
             <div className="flex items-start justify-between">
               <div>
                 <div className="text-lg font-semibold">{selected.nama}</div>
@@ -456,6 +525,7 @@ const DaftarCalon: React.FC = () => {
               <button
                 className="ml-4 rounded bg-slate-100 px-2 py-1"
                 onClick={() => setSelected(null)}
+                style={{ cursor: "pointer" }}
               >
                 Close
               </button>
@@ -469,7 +539,7 @@ const DaftarCalon: React.FC = () => {
                 </div>
               </div>
               <div>
-                <div className="text-sm font-medium">Ticket</div>
+                <div className="text-sm font-medium">Nomor</div>
                 <div className="text-sm">{selected.ticket_number ?? "—"}</div>
               </div>
             </div>

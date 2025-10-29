@@ -1,10 +1,10 @@
 import React from "react";
-import Tabel from "../../components/Jadwal/Tabel";
-import jadwals from "../../data/jadwals";
+import Tabel from "../../../components/MainWeb/Jadwal/Tabel";
+import jadwals from "../../../data/jadwals";
 
 const Jadwal: React.FC = () => {
   return (
-    <div className="container mx-auto mt-12 items-center justify-center bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center bg-no-repeat px-4 py-16">
+    <div className="mx-auto mt-12 h-full min-h-screen items-center justify-center bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat px-4 py-16">
       <div className="rounded-t-xl bg-[#143b8a] px-6 pt-4 pb-2">
         <h2 className="text-2xl font-bold text-white">Data Jadwal Per Kelas</h2>
         <p className="mt-1 text-xs text-white">

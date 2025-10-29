@@ -1,10 +1,10 @@
 import React from "react";
-import FAQCard from "../../components/FAQ/FAQCard";
-import AnimatedContent from "../../components/Common/AnimatedContent";
+import FAQCard from "../../../components/MainWeb/FAQ/FAQCard";
+import AnimatedContent from "../../../components/MainWeb/Common/AnimatedContent";
 
 const FAQ: React.FC = () => {
   return (
-    <div className="container mx-auto mt-12 min-h-screen items-center justify-center bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center bg-no-repeat px-4 py-16">
+    <div className="mx-auto mt-12 min-h-screen w-full items-center justify-center bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat px-4 py-16">
       <AnimatedContent
         distance={150}
         direction="vertical"

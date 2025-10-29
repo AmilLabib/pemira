@@ -1,10 +1,10 @@
 import React from "react";
-import Card from "../../components/Pemilihan/Card";
-import AnimatedContent from "../../components/Common/AnimatedContent";
+import Card from "../../../components/MainWeb/Pemilihan/Card";
+import AnimatedContent from "../../../components/MainWeb/Common/AnimatedContent";
 
 const Pemilihan: React.FC = () => {
   return (
-    <div className="container mx-auto mt-12 min-h-screen items-center justify-center bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center bg-no-repeat px-0 py-16">
+    <div className="mx-auto mt-12 min-h-screen w-full items-center justify-center bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat px-0 py-16">
       <AnimatedContent
         distance={150}
         direction="vertical"

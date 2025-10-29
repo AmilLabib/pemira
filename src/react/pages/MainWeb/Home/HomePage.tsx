@@ -1,9 +1,12 @@
-import Timeline from "../../components/Home/Timeline";
-import Carousel, { type Slide } from "../../components/Home/Carousel";
-import Hero from "../../components/Home/Hero";
-import Tugas from "../../components/Home/Tugas";
-import Hasil from "../../components/Home/Hasil";
-import AnimatedContent from "../../components/Common/AnimatedContent";
+import Timeline from "../../../components/MainWeb/Home/Timeline";
+import Carousel, {
+  type Slide,
+} from "../../../components/MainWeb/Home/Carousel";
+import Hero from "../../../components/MainWeb/Home/Hero";
+import Tugas from "../../../components/MainWeb/Home/Tugas";
+import Hasil from "../../../components/MainWeb/Home/Hasil";
+import AnimatedContent from "../../../components/MainWeb/Common/AnimatedContent";
+import PresmaColumnChart from "../../../components/MainWeb/Home/PresmaColumnChart";
 
 const carouselSlides: Slide[] = [
   { type: "youtube", videoId: "dQw4w9WgXcQ", title: "Promo Video" },
@@ -29,7 +32,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <Hero />
-      <div className="w-full bg-[url('/src/react/assets/bg1.webp')] bg-cover bg-center bg-no-repeat">
+      <div className="w-full bg-[url('/src/react/assets/MainWeb/bg1.webp')] bg-cover bg-top bg-no-repeat">
         <AnimatedContent
           distance={150}
           direction="vertical"
@@ -47,7 +50,7 @@ const HomePage: React.FC = () => {
         >
           <section className="container mx-auto my-8 px-4">
             <Carousel slides={carouselSlides} interval={6000} showIndicators />
-      </section>
+          </section>
         </AnimatedContent>
 
         <div className="container mx-auto">
@@ -59,6 +62,15 @@ const HomePage: React.FC = () => {
           >
             <Hasil />
           </AnimatedContent>
+          <AnimatedContent
+            distance={150}
+            direction="vertical"
+            duration={1}
+            delay={0.3}
+          >
+            <PresmaColumnChart />
+          </AnimatedContent>
+
           <AnimatedContent
             distance={150}
             direction="vertical"
