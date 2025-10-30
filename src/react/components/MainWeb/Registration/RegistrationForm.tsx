@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { apiFetch } from "../../../lib/api";
 import { LoaderCircle } from "lucide-react";
 import FileInput from "./FileInput";
 
@@ -203,7 +204,7 @@ const RegistrationForm: React.FC<Props> = ({ defaultPosisi = "" }) => {
     // POST to server API
     (async () => {
       try {
-        const res = await fetch("/api/daftar", {
+        const res = await apiFetch("/api/daftar", {
           method: "POST",
           body: data,
         });

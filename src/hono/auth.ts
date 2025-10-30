@@ -52,8 +52,10 @@ export async function createSessionCookie(
     new TextEncoder().encode(payload),
   );
   const cookieVal = `${btoa(username)}.${expiry}.${base64UrlEncode(sigBuf)}`;
-  // HttpOnly cookie; do not set Secure to keep local dev easier. Path=/ and SameSite=Lax.
-  const cookie = `admin_session=${cookieVal}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAgeSeconds}`;
+  const domain = (env as any).ADMIN_COOKIE_DOMAIN as string | undefined;
+  const secure = domain ? "; Secure" : ""; // require Secure when a domain is set (production)
+  const domainPart = domain ? `; Domain=${domain}` : "";
+  const cookie = `admin_session=${cookieVal}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAgeSeconds}${domainPart}${secure}`;
   return cookie;
 }
 

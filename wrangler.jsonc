@@ -18,7 +18,7 @@
   },
   "routes": [
     {
-      "pattern": "pemira.skp.my.id",
+      "pattern": "api.pemirapknstan2025.com",
       "custom_domain": true,
     },
   ],
@@ -26,15 +26,15 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "pemira",
-      "database_id": "13aff2f0-444e-4227-b228-298ad262d715",
+      "database_name": "pemira_api",
+      "database_id": "032ff642-f9ec-49f4-8ca8-0eaec72b4a6d",
+      "remote": true,
     },
   ],
   "r2_buckets": [
     {
       "binding": "BUCKET",
-      "bucket_name": "pemira",
-      "preview_bucket_name": "pemira-preview",
+      "bucket_name": "pemira-api",
     },
   ],
   /**

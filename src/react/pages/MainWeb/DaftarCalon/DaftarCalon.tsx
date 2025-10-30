@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { apiFetch } from "../../../lib/api";
 import Ribbon from "../../../components/MainWeb/DaftarCalon/Ribbon";
 
 type Candidate = {
@@ -31,7 +32,7 @@ const DaftarCalon: React.FC = () => {
     async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch("/api/daftar/bakal_calon");
+        const res = await apiFetch("/api/daftar/bakal_calon");
         const json = await res.json();
         if (json.success && mounted) {
           // only show verified candidates
@@ -70,7 +71,9 @@ const DaftarCalon: React.FC = () => {
         const fetchUrl = isLikelyKey
           ? `/api/daftar/file?key=${encodeURIComponent(c.foto)}`
           : c.foto;
-        const res = await fetch(fetchUrl);
+        const res = isLikelyKey
+          ? await apiFetch(fetchUrl)
+          : await fetch(fetchUrl);
         if (!res.ok) throw new Error(`status ${res.status}`);
         const blob = await res.blob();
         const obj = URL.createObjectURL(blob);

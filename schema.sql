@@ -19,3 +19,22 @@ CREATE TABLE bakal_calon (
     is_verified INTEGER DEFAULT 0 NOT NULL,
     ticket_number INTEGER
 )
+
+-- voters (voterlist) table to back Admin VerifyPemilih UI
+DROP TABLE IF EXISTS voters;
+CREATE TABLE voters (
+    external_id TEXT,
+    name TEXT NOT NULL,
+    token TEXT,
+    nim TEXT NOT NULL UNIQUE,
+    jurusan TEXT,
+    dapil TEXT,
+    absent_number TEXT,
+    gender TEXT,
+    angkatan TEXT,
+    kelas TEXT,
+    status TEXT,
+    has_voted INTEGER DEFAULT 0 NOT NULL,
+    voted_at TEXT,
+    extra TEXT
+);

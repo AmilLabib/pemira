@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE } from "../../../lib/api";
 
 interface CardProps {
   onSubmit?: (nim: string, token: string) => void;
@@ -18,38 +19,91 @@ const Card: React.FC<CardProps> = ({ onSubmit }) => {
       onSubmit(nim, token);
       return;
     }
-
-    try {
-      const raw = localStorage.getItem("voters");
-      if (raw) {
-        const voters = JSON.parse(raw) as any[];
-        const found = voters.find((v) => {
-          const vn = String(v.nim ?? "")
-            .trim()
-            .toLowerCase();
-          const vt = String(v.token ?? "").trim();
-          return vn === nim.trim().toLowerCase() && vt === token.trim();
+    // Try server login first
+    (async () => {
+      try {
+        const resp = await fetch(`${API_BASE}/api/vote/login`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ nim: nim.trim(), token: token.trim() }),
         });
-        if (found) {
-          try {
-            sessionStorage.setItem(
-              "voter",
-              JSON.stringify({ nim: nim.trim(), name: found.name ?? "" }),
-            );
-          } catch (e) {
-            // ignore
+        if (resp.ok) {
+          const json = await resp.json();
+          if (json.success && json.voter) {
+            // If the voter already voted, block and show message
+            const serverStatusRaw =
+              json.voter.status ??
+              json.voter.has_voted ??
+              json.voter.voted_at ??
+              "";
+            const serverStatus = String(serverStatusRaw).toLowerCase();
+            // accept 'voted' (string), boolean true, or non-empty voted_at timestamp
+            if (
+              serverStatus === "Voted" ||
+              json.voter.has_voted === true ||
+              (json.voter.voted_at || "") !== ""
+            ) {
+              alert("Anda sudah memilih. Terima Kasih");
+              return;
+            }
+            try {
+              sessionStorage.setItem("voter", JSON.stringify(json.voter));
+            } catch (e) {
+              // ignore
+            }
+            window.location.href = "/voting/vote";
+            return;
           }
-          window.location.href = "/voting/vote";
-          return;
         }
+      } catch (e) {
+        // server unavailable, fall back to localStorage
       }
-    } catch (e) {
-      // ignore parse errors
-    }
 
-    alert(
-      "NIM atau TOKEN tidak ditemukan. Pastikan data yang dimasukkan sudah benar.",
-    );
+      // fallback: localStorage-based check (existing behavior)
+      try {
+        const raw = localStorage.getItem("voters");
+        if (raw) {
+          const voters = JSON.parse(raw) as any[];
+          const found = voters.find((v) => {
+            const vn = String(v.nim ?? "")
+              .trim()
+              .toLowerCase();
+            const vt = String(v.token ?? "").trim();
+            return vn === nim.trim().toLowerCase() && vt === token.trim();
+          });
+          if (found) {
+            // block if already voted
+            const localStatusRaw =
+              found.status ?? found.has_voted ?? found.voted_at ?? "";
+            const localStatus = String(localStatusRaw).toLowerCase();
+            if (
+              localStatus === "Voted" ||
+              found.has_voted === true ||
+              (found.voted_at || "") !== ""
+            ) {
+              alert("Anda sudah memilih. Terima Kasih");
+              return;
+            }
+            try {
+              sessionStorage.setItem(
+                "voter",
+                JSON.stringify({ nim: nim.trim(), name: found.name ?? "" }),
+              );
+            } catch (e) {
+              // ignore
+            }
+            window.location.href = "/voting/vote";
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore parse errors
+      }
+
+      alert(
+        "NIM atau TOKEN tidak ditemukan. Pastikan data yang dimasukkan sudah benar.",
+      );
+    })();
   };
 
   return (

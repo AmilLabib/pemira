@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useCallback, useState } from "react";
+import { apiFetch } from "../lib/api";
 
 type AuthContextValue = {
   isAdmin: boolean;
@@ -19,8 +20,9 @@ export const AuthProvider: React.FC<
   const verifyWithBackend = useCallback(async () => {
     if (cachedVerified === true) return true;
     try {
-      const res = await fetch("/api/admin/verify", {
-        credentials: "same-origin",
+      const res = await apiFetch("/api/admin/verify", {
+        // use include so cross-site cookies (api.pemirapknstan2025 -> pemirapknstan2025.com) are sent
+        credentials: "include",
       });
       if (!res.ok) return false;
       const j = await res.json();
@@ -41,10 +43,10 @@ export const AuthProvider: React.FC<
 
   const login = useCallback(async (username: string, password: string) => {
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await apiFetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) return false;
@@ -63,9 +65,9 @@ export const AuthProvider: React.FC<
 
   const logout = useCallback(async () => {
     try {
-      await fetch("/api/admin/logout", {
+      await apiFetch("/api/admin/logout", {
         method: "POST",
-        credentials: "same-origin",
+        credentials: "include",
       });
     } catch (err) {
       // ignore network errors on logout

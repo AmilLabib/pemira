@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { API_BASE } from "../../lib/api";
 import FilterBar, {
   type FilterValues,
 } from "../../components/Admin/VerifyPemilih/Filter";
@@ -50,8 +51,8 @@ const VerifyPage: React.FC = () => {
   const fetchCandidates = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/bakal_calon", {
-        credentials: "same-origin",
+      const res = await fetch(`${API_BASE}/api/admin/bakal_calon`, {
+        credentials: "include",
       });
       const json = await res.json();
       if (json.success) setCandidates(json.result || []);
@@ -68,10 +69,13 @@ const VerifyPage: React.FC = () => {
 
   async function toggleVerify(nim: string) {
     try {
-      const res = await fetch(`/api/admin/bakal_calon/${nim}/verify`, {
-        method: "POST",
-        credentials: "same-origin",
-      });
+      const res = await fetch(
+        `${API_BASE}/api/admin/bakal_calon/${nim}/verify`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
       const json = await res.json();
       if (json.success) {
         setCandidates((prev) =>
@@ -192,10 +196,12 @@ const VerifyPage: React.FC = () => {
                                   return;
                                 try {
                                   const res = await fetch(
-                                    `/api/admin/bakal_calon/${encodeURIComponent(c.nim)}`,
+                                    `${API_BASE}/api/admin/bakal_calon/${encodeURIComponent(
+                                      c.nim,
+                                    )}`,
                                     {
                                       method: "DELETE",
-                                      credentials: "same-origin",
+                                      credentials: "include",
                                     },
                                   );
                                   const json = await res.json();
@@ -239,10 +245,10 @@ const VerifyPage: React.FC = () => {
         onSave={async (nim, updated) => {
           try {
             const res = await fetch(
-              `/api/admin/bakal_calon/${encodeURIComponent(nim)}`,
+              `${API_BASE}/api/admin/bakal_calon/${encodeURIComponent(nim)}`,
               {
                 method: "PUT",
-                credentials: "same-origin",
+                credentials: "include",
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify(updated),
               },

@@ -3,6 +3,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import type { FilterValues } from "./Filter";
 import PopupUpload from "./PopupUpload";
 import PopupReset from "./PopupReset";
+import { API_BASE } from "../../../lib/api";
 
 type Props = {
   filters?: FilterValues;
@@ -42,6 +43,35 @@ export default function VotersList({
     }
     return typeof sample !== "undefined" ? [...sample] : [];
   });
+
+  // fetch voters from server (fallback to localStorage if server unavailable)
+  const fetchVotersFromServer = useCallback(async () => {
+    try {
+      const q = new URLSearchParams();
+      // optionally include filters
+      if (filters?.search) q.set("search", String(filters.search));
+      if (filters?.jurusan) q.set("jurusan", String(filters.jurusan));
+      if (filters?.class) q.set("class", String(filters.class));
+      if (filters?.status) q.set("status", String(filters.status));
+      const resp = await fetch(`${API_BASE}/api/admin/voters?${q.toString()}`, {
+        credentials: "include",
+      });
+      if (!resp.ok) throw new Error(`status ${resp.status}`);
+      const data = await resp.json();
+      if (data && data.result) {
+        setVoters(data.result);
+        return true;
+      }
+    } catch (err) {
+      // ignore and keep local state
+    }
+    return false;
+  }, [filters]);
+
+  useEffect(() => {
+    // try to load from server on mount
+    fetchVotersFromServer();
+  }, [fetchVotersFromServer]);
 
   useEffect(() => {
     setPage(1);
@@ -201,7 +231,7 @@ export default function VotersList({
     });
   }, []);
 
-  const normalizeRow = useCallback((row: any, _idx: number, baseId: number) => {
+  const normalizeRow = useCallback((row: any, _idx: number) => {
     const get = (keys: string[]) => {
       for (const k of keys) {
         if (k in row && row[k] !== "") return row[k];
@@ -209,12 +239,17 @@ export default function VotersList({
       return "";
     };
 
+    const fallbackId = String(
+      get(["id", "id_number", "external_id", "externalid", "ID", "rowid"]) || get(["nim"]) || "",
+    ).trim();
+
     return {
-      id: row.id || row.ID || `csv-${baseId + _idx}`,
+      // ensure we always have a stable id for display and React keys
+      id: fallbackId,
       name: get(["name", "full_name", "nama"]),
       token: get(["token"]),
       // Skip nim yang sama
-      nim: String(get(["nim", "student_id", "npm"])).trim(),
+      nim: String(get(["nim", "student_id", "npm"]) ).trim(),
       jurusan: get(["jurusan", "department"]),
       dapil: get(["dapil", "dapil"]),
       absentNumber: get([
@@ -222,7 +257,7 @@ export default function VotersList({
         "absentnumber",
         "absent",
         "no_absen",
-      ]),
+      ]) || get(["absent", "absent_number"]),
       gender: get(["gender", "jenis_kelamin"]),
       angkatan: get(["angkatan", "year"]),
       kelas: get(["kelas", "class"]),
@@ -233,6 +268,26 @@ export default function VotersList({
 
   // handle uploaded CSV file
   async function handleUpload(file: File) {
+    // Post the file to server import endpoint. If that fails, fall back to client-side import.
+    try {
+      const fd = new FormData();
+      fd.append("file", file, file.name);
+      const resp = await fetch(`${API_BASE}/api/admin/voters/import`, {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      });
+      if (!resp.ok) throw new Error(`status ${resp.status}`);
+      // reload from server
+      await fetchVotersFromServer();
+      setPage(1);
+      setShowUpload(false);
+      return;
+    } catch (err) {
+      // fallback to client-side parsing and storing in localStorage
+    }
+
+    // fallback: parse locally
     const reader = new FileReader();
     reader.onload = async () => {
       const text = String(reader.result ?? "");
@@ -242,8 +297,7 @@ export default function VotersList({
           setShowUpload(false);
           return;
         }
-        const baseId = Date.now();
-        const newRecords = parsed.map((r, i) => normalizeRow(r, i, baseId));
+        const newRecords = parsed.map((r, i) => normalizeRow(r, i));
 
         setVoters((prev) => {
           const existingNims = new Set(
@@ -292,7 +346,7 @@ export default function VotersList({
     try {
       const XLSX = await import(/* webpackChunkName: "xlsx" */ "xlsx");
       const rows = voters.map((v) => ({
-        id: v.id ?? "",
+        id: v.id ?? v.external_id ?? v.ID ?? "",
         name: v.name ?? "",
         nim: v.nim ?? "",
         token: v.token ?? "",
@@ -301,7 +355,7 @@ export default function VotersList({
         kelas: v.kelas ?? "",
         angkatan: v.angkatan ?? "",
         gender: v.gender ?? "",
-        absentNumber: v.absentNumber ?? "",
+        absentNumber: v.absentNumber ?? v.absent ?? v.absent_number ?? "",
         status: v.status ?? "",
       }));
 
@@ -481,7 +535,7 @@ export default function VotersList({
                   {s.dapil}
                 </td>
                 <td className="w-16 px-4 py-4 text-center text-sm text-gray-700">
-                  {s.absent}
+                  {s.absentNumber ?? s.absent ?? s.absent_number ?? ""}
                 </td>
                 <td className="flex items-center gap-2 px-4 py-4 text-sm text-gray-700">
                   {s.gender}
@@ -493,7 +547,9 @@ export default function VotersList({
                 <td className="px-4 py-4 text-sm">
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-sm whitespace-nowrap text-white ${
-                      s.status === "Voted" ? "bg-green-500" : "bg-red-500"
+                      String(s.status || "").toLowerCase() === "voted"
+                        ? "bg-green-500"
+                        : "bg-red-500"
                     }`}
                   >
                     {s.status}
@@ -604,16 +660,30 @@ export default function VotersList({
         open={showReset}
         onClose={() => setShowReset(false)}
         onConfirm={() => {
-          console.log("Resetting all voter data");
-          setVoters([]);
-          try {
-            if (typeof window !== "undefined")
-              localStorage.removeItem("voters");
-          } catch (e) {
-            // ignore
-          }
-          setPage(1);
-          setShowReset(false);
+          (async () => {
+            try {
+              const resp = await fetch(`${API_BASE}/api/admin/voters/reset`, {
+                method: "POST",
+                credentials: "include",
+              });
+              if (resp.ok) {
+                setVoters([]);
+                try {
+                  if (typeof window !== "undefined")
+                    localStorage.removeItem("voters");
+                } catch {}
+              }
+            } catch (err) {
+              // fallback to client-side reset
+              setVoters([]);
+              try {
+                if (typeof window !== "undefined")
+                  localStorage.removeItem("voters");
+              } catch {}
+            }
+            setPage(1);
+            setShowReset(false);
+          })();
         }}
       />
 

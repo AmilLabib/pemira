@@ -403,4 +403,204 @@ admin.get("/file", async (c: Context<{ Bindings: Bindings }>) => {
   }
 });
 
+// list voters (for admin UI)
+admin.get("/voters", async (c: Context<{ Bindings: Bindings }>) => {
+  const unauth = await requireAdmin(c as any);
+  if (unauth) return unauth;
+  try {
+    const search = c.req.query("search") as string | null;
+    const jurusan = c.req.query("jurusan") as string | null;
+    const kelas = c.req.query("class") as string | null;
+    const status = c.req.query("status") as string | null;
+
+    const where: string[] = [];
+    const binds: any[] = [];
+    if (search) {
+      where.push(
+        "(lower(name) LIKE ? OR lower(nim) LIKE ? OR lower(token) LIKE ?)",
+      );
+      const s = `%${search.toLowerCase()}%`;
+      binds.push(s, s, s);
+    }
+    if (jurusan && !/all/i.test(jurusan)) {
+      where.push("jurusan LIKE ?");
+      binds.push(`%${jurusan}%`);
+    }
+    if (kelas && !/all/i.test(kelas)) {
+      where.push("kelas LIKE ?");
+      binds.push(`%${kelas}%`);
+    }
+    if (status && !/all/i.test(status)) {
+      where.push("status = ?");
+      binds.push(status);
+    }
+
+    const sql = `SELECT * FROM voters${where.length ? " WHERE " + where.join(" AND ") : ""} ORDER BY name`;
+    const res = await c.env.DB.prepare(sql)
+      .bind(...binds)
+      .all();
+    return c.json({ success: true, result: res.results || [] });
+  } catch (err: unknown) {
+    console.error("list voters error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
+
+// import voters (CSV upload)
+admin.post("/voters/import", async (c: Context<{ Bindings: Bindings }>) => {
+  const unauth = await requireAdmin(c as any);
+  if (unauth) return unauth;
+  try {
+    const form = await c.req.formData();
+    const file = form.get("file") as File | null;
+    if (!file) return c.json({ success: false, error: "no file" }, 400);
+    const text = await file.text();
+
+    // simple CSV parser (handles quoted fields) - similar to client parse
+    function parseCSV(text: string) {
+      const rows: string[] = [];
+      let cur = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          if (inQuotes && text[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+        if (ch === "\n" && !inQuotes) {
+          rows.push(cur);
+          cur = "";
+          continue;
+        }
+        cur += ch;
+      }
+      if (cur) rows.push(cur);
+      const parsed = rows.map((r) =>
+        r
+          .split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/)
+          .map((c) => c.replace(/^\"|\"$/g, "").trim()),
+      );
+      if (!parsed.length) return [];
+      const headers = parsed[0].map((h) =>
+        h.toLowerCase().replace(/\s+/g, "_"),
+      );
+      return parsed.slice(1).map((cols) => {
+        const obj: any = {};
+        headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
+        return obj;
+      });
+    }
+
+    const rows = parseCSV(text);
+    if (!rows.length) return c.json({ success: true, inserted: 0, updated: 0 });
+
+    let inserted = 0;
+    let updated = 0;
+    const diagnostics: Array<{
+      row: number;
+      nim?: string;
+      ok: boolean;
+      error?: string;
+    }> = [];
+    // upsert per row
+    const upsertSql = `INSERT INTO voters (external_id,name,token,nim,jurusan,dapil,absent_number,gender,angkatan,kelas,status,extra) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(nim) DO UPDATE SET external_id=excluded.external_id, name=excluded.name, token=excluded.token, jurusan=excluded.jurusan, dapil=excluded.dapil, absent_number=excluded.absent_number, gender=excluded.gender, angkatan=excluded.angkatan, kelas=excluded.kelas, status=excluded.status, extra=excluded.extra, updated_at=CURRENT_TIMESTAMP;`;
+
+    let rowIndex = 0;
+    for (const r of rows) {
+      rowIndex++;
+      // Map expected CSV headers exactly (lowercased by parser): id,name,token,nim,jurusan,dapil,absent,gender,angkatan,kelas,status
+      const nim = String(r.nim ?? r["nim"] ?? r["NIM"] ?? "").trim();
+      if (!nim) {
+        diagnostics.push({ row: rowIndex, ok: false, error: "missing nim" });
+        continue;
+      }
+      const external_id = r.id ?? r["id"] ?? null;
+      const name = r.name ?? "";
+      const token = r.token ?? "";
+      const jurusan = r.jurusan ?? "";
+      const dapil = r.dapil ?? "";
+      const absent_number = String(
+        r.absent ?? r["absent"] ?? r.absent_number ?? "",
+      );
+      const gender = r.gender ?? "";
+      const angkatan = r.angkatan ?? r["angkatan"] ?? "";
+      const kelas = r.kelas ?? "";
+      const statusVal = r.status ?? "";
+
+      try {
+        // check existence
+        const exist = await c.env.DB.prepare(
+          "SELECT nim FROM voters WHERE nim = ?",
+        )
+          .bind(nim)
+          .first();
+        await c.env.DB.prepare(upsertSql)
+          .bind(
+            external_id,
+            name,
+            token,
+            nim,
+            jurusan,
+            dapil,
+            absent_number,
+            gender,
+            angkatan,
+            kelas,
+            statusVal,
+            JSON.stringify(r),
+          )
+          .run();
+        if (exist) updated++;
+        else inserted++;
+        diagnostics.push({ row: rowIndex, nim, ok: true });
+      } catch (err: unknown) {
+        diagnostics.push({ row: rowIndex, nim, ok: false, error: String(err) });
+        console.error("upsert row error", String(err));
+      }
+    }
+
+    return c.json({ success: true, inserted, updated, diagnostics });
+  } catch (err: unknown) {
+    console.error("import voters error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
+
+// reset voters (truncate)
+admin.post("/voters/reset", async (c: Context<{ Bindings: Bindings }>) => {
+  const unauth = await requireAdmin(c as any);
+  if (unauth) return unauth;
+  try {
+    await c.env.DB.prepare("DELETE FROM voters").run();
+    return c.json({ success: true });
+  } catch (err: unknown) {
+    console.error("reset voters error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
+
+// debug: count voters and return a small sample (admin only)
+admin.get("/voters/count", async (c: Context<{ Bindings: Bindings }>) => {
+  const unauth = await requireAdmin(c as any);
+  if (unauth) return unauth;
+  try {
+    const cntRes = await c.env.DB.prepare(
+      "SELECT COUNT(*) as cnt FROM voters",
+    ).first();
+    const cnt = (cntRes && (cntRes as any).cnt) || 0;
+    const sample = await c.env.DB.prepare(
+      "SELECT nim, name, status FROM voters ORDER BY created_at DESC LIMIT 10",
+    ).all();
+    return c.json({ success: true, count: cnt, sample: sample.results || [] });
+  } catch (err: unknown) {
+    console.error("voters count error", String(err));
+    return c.json({ success: false, error: String(err) }, { status: 500 });
+  }
+});
+
 export default admin;

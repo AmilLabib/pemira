@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE } from "../../lib/api";
 
 type Candidate = {
   posisi: string;
@@ -369,10 +370,12 @@ export default function EditCandidateModal({
                     if (f) fd.append(k, f);
                   }
                   const res = await fetch(
-                    `/api/admin/bakal_calon/${encodeURIComponent(candidate.nim)}/upload`,
+                    `${API_BASE}/api/admin/bakal_calon/${encodeURIComponent(
+                      candidate.nim,
+                    )}/upload`,
                     {
                       method: "POST",
-                      credentials: "same-origin",
+                      credentials: "include",
                       body: fd,
                     },
                   );

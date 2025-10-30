@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "../../../lib/api";
 
 type Candidate = {
   posisi: string;
@@ -31,7 +32,7 @@ const PresmaColumnChart: React.FC<Props> = ({ height = 400 }) => {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch("/api/daftar/bakal_calon");
+        const res = await apiFetch("/api/daftar/bakal_calon");
         if (!res.ok) throw new Error("fetch failed");
         const json = await res.json();
         if (json?.result && mounted) {
